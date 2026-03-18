@@ -8,7 +8,9 @@ export const config = {
         "eur",
         "pln",
         "czk",
-        "usd"
+        "usd",
+        "gbp",
+        "chf",
     ]
 }
 

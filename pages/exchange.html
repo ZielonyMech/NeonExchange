@@ -8,25 +8,48 @@
     <script src="./exchange.js" type="module"></script>
 </head>
 <body>
-    <nav class="taskbar">
-        <ul>
-            <li><a href="../index.html">Strona główna</a></li>
-            <li><a href="./exchange.html">Kursy walut</a></li>
-            <li><a href="../contact.html">Kontakt</a></li>
-        </ul>
-    </nav>
+    <header class="header">
+        <div class="header-inner">
+            <div class="brand">NeonExchange</div>
+            <button class="hamburger" id="hamburger" aria-label="Przełącz menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <nav class="nav-menu" id="navMenu" aria-label="Główna nawigacja">
+                <ul>
+                    <li><a href="#home">Strona główna</a></li>
+                    <li><a href="#about">O nas</a></li>
+                    <li><a href="#services">Usługi</a></li>
+                    <li><a href="#contact">Kontakt</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
     <main>
         <h1>Kursy walut z całego świata!</h1>
 
-        <label for="currency">Wybierz walutę</label><br>
-        <input id="currency" name="currency" type="text" placeholder="Wyszukaj kurs waluty">  
+
+        <div class="currencySearchWrapper">
+            <label for="currency">Wyszukaj walutę</label><br>
+            <input id="currency" name="currency" type="text" placeholder="Wyszukaj kurs waluty">
+        </div>
 
         <div class="loading" hidden>Loading…</div>
 
         <div class="availableCurrencies"></div>
 
         <div class="exchangeRates"></div>
+
+        <canvas class="currencyChart"></canvas>
     </main>
+
+    <footer class="footer">
+        <div class="footer-inner">
+            <p>&copy; 2026 NeonExchange. Wszelkie prawa zastrzeżone.</p>
+            <p><a href="#contact">Kontakt</a> · <a href="#about">O nas</a> · <a href="#privacy">Polityka prywatności</a></p>
+        </div>
+    </footer>
 </body>
 </html>

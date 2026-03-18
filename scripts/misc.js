@@ -60,3 +60,14 @@ export function filterAvailableCurrenciesWithohutSelf(object, self) {
     config.supportedCurrencies.includes(elem.code) && elem.code != self
   );
 }
+
+export function filterCertainCurrency(list, onlyCodes = []) {
+  if (!Array.isArray(onlyCodes) || onlyCodes.length === 0) return list;
+
+  const allowed = new Set(onlyCodes.map(c => String(c).toLowerCase()));
+
+  return list.filter((elem) => {
+    const code = typeof elem === "string" ? elem : elem?.code;
+    return allowed.has(String(code).toLowerCase());
+  });
+}

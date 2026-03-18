@@ -1,5 +1,6 @@
-import { APIgetAvailableCurrencies, APIgetCurrencyRates } from '../scripts/apiFacade.js';
+import { APIgetAvailableCurrencies, APIgetCurrencyRates, APIgetCurrencyRatesRange } from '../scripts/apiFacade.js';
 import { toggleActive } from '../scripts/misc.js';
+import Chart from "https://cdn.jsdelivr.net/npm/chart.js@4.4.3/auto/+esm";
 
 function formatRate(value) {
     const num = Number(value);
@@ -34,6 +35,7 @@ function renderRates({ date, base, ratesArr }, selectedCurrencyCode) {
             const card = document.createElement('div');
             card.className = 'rateCard';
             card.dataset.code = code;
+            card.onclick = () => displayChartPopup(selectedCurrencyCode, code);
 
             const codeEl = document.createElement('div');
             codeEl.className = 'rateCode';
@@ -72,7 +74,7 @@ async function searchCurrency(value) {
 function createCurrencyElement(root, currency) {
     const currencyElement = document.createElement('div');
     currencyElement.className = 'currencyCard';
-    currencyElement.textContent = currency.name;
+    currencyElement.innerHTML = `${currency.name}<br>(${currency.code.toUpperCase()}) `;
 
     currencyElement.addEventListener('click', (elem) => {       
         toggleActive(root, elem.target, "selected");
@@ -80,6 +82,39 @@ function createCurrencyElement(root, currency) {
     });
 
     return currencyElement;
+}
+
+var chart = null;
+
+async function displayChartPopup(baseCurrency, selectedCurrency) {
+    console.log(`${baseCurrency} -> ${selectedCurrency}`)
+
+    const ctx = document.querySelector('.currencyChart');
+
+    if(chart) {
+        chart.destroy();
+    }
+
+    let data = await APIgetCurrencyRatesRange(baseCurrency, "2026-03-01", "2026-03-10", undefined, {onlyCurrencies: [selectedCurrency]})
+
+    console.log(data);
+
+    const labels = data.map(elem => elem.date);
+    const chartData = {
+        labels: labels,
+        datasets: [{
+            label: 'Wykres kursu',
+            data: data.map(elem => elem.ratesArr[0].value),
+            fill: false,
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1
+        }]
+    };
+
+    chart = new Chart(ctx, {
+        type: 'line',
+        data: chartData
+    });
 }
 
 const currencyInput = document.querySelector('#currency');
