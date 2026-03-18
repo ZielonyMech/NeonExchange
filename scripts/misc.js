@@ -1,3 +1,5 @@
+import { config } from './config/config.js'
+
 let pendingRequests = 0;
 
 function setLoading(isLoading, elementClass=".loading") {
@@ -45,4 +47,16 @@ export async function withLoading(promiseFn, elementClass=".loading") {
       setLoading(false, elementClass);
     }
   }
+}
+
+export function filterAvailableCurrencies(object) {
+  return object.filter(elem =>
+    config.supportedCurrencies.includes(elem.code)
+  );
+}
+
+export function filterAvailableCurrenciesWithohutSelf(object, self) {
+  return object.filter(elem =>
+    config.supportedCurrencies.includes(elem.code) && elem.code != self
+  );
 }
