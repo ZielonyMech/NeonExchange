@@ -392,3 +392,41 @@ main {
   font-variant-numeric: tabular-nums;
   color: #0f172a;
 }
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid #000000;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  box-sizing: border-box;
+  display: inline-block;
+  animation: rotation 1s linear infinite;
+}
+
+.loader[hidden] {
+  display: none !important;
+}
+
+.loading[hidden] {
+  display: none !important;
+}
+
+.chartSection {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 20rem;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+@keyframes rotation {
+  0% {
+      transform: rotate(0deg);
+  }
+  100% {
+      transform: rotate(360deg);
+  }
+} 

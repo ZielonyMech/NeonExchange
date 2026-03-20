@@ -30,19 +30,19 @@
     <main>
         <h1>Kursy walut z całego świata!</h1>
 
-
         <div class="currencySearchWrapper">
             <label for="currency">Wyszukaj walutę</label><br>
             <input id="currency" name="currency" type="text" placeholder="Wyszukaj kurs waluty">
         </div>
 
-        <div class="loading" hidden>Loading…</div>
-
         <div class="availableCurrencies"></div>
 
         <div class="exchangeRates"></div>
 
-        <canvas class="currencyChart"></canvas>
+        <div class="chartSection">
+            <span class="loader" hidden></span>
+            <canvas class="currencyChart"></canvas>
+        </div>
     </main>
 
     <footer class="footer">

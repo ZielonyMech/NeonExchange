@@ -73,52 +73,53 @@ export async function APIgetCurrencyRates(currencyCode, filterFn = filterAvailab
 }
 
 export async function APIgetCurrencyRatesRange(currencyCode, startDate, endDate, filterFn = filterAvailableCurrenciesWithohutSelf, options = {}) {
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+    await sleep(2000);
+
     const { concurrency = 4, continueOnError = false, onlyCurrencies = [] } = options ?? {};
 
-    return withLoading(async () => {
-        const startISO = toISODate(startDate);
-        const endISO = toISODate(endDate);
-        if (startISO > endISO) {
-            throw new Error(`startDate must be <= endDate (got ${startISO} > ${endISO})`);
-        }
+    const startISO = toISODate(startDate);
+    const endISO = toISODate(endDate);
+    if (startISO > endISO) {
+        throw new Error(`startDate must be <= endDate (got ${startISO} > ${endISO})`);
+    }
 
-        const dates = [];
-        for (let d = startISO; d <= endISO; d = addDaysISO(d, 1)) {
-            dates.push(d);
-        }
+    const dates = [];
+    for (let d = startISO; d <= endISO; d = addDaysISO(d, 1)) {
+        dates.push(d);
+    }
 
-        const results = [];
+    const results = [];
 
-        let idx = 0;
-        const worker = async () => {
-            while (idx < dates.length) {
-                const current = dates[idx++];
-                try {
-                    const response = await fetch(buildCurrencyRatesUrl(currencyCode, current));
-                    const data = await response.json();
+    let idx = 0;
+    const worker = async () => {
+        while (idx < dates.length) {
+            const current = dates[idx++];
+            try {
+                const response = await fetch(buildCurrencyRatesUrl(currencyCode, current));
+                const data = await response.json();
 
-                    const date = data.date ?? current;
-                    const [base, ratesObj] = Object.entries(data).find(([k]) => k !== "date") ?? [];
-                    let ratesArr = Object.entries(ratesObj ?? {}).map(([code, value]) => ({
-                        code,
-                        value,
-                    }));
+                const date = data.date ?? current;
+                const [base, ratesObj] = Object.entries(data).find(([k]) => k !== "date") ?? [];
+                let ratesArr = Object.entries(ratesObj ?? {}).map(([code, value]) => ({
+                    code,
+                    value,
+                }));
 
-                    ratesArr = filterFn ? filterFn(ratesArr, currencyCode) : ratesArr;
-                    ratesArr = filterCertainCurrency(ratesArr, onlyCurrencies);
+                ratesArr = filterFn ? filterFn(ratesArr, currencyCode) : ratesArr;
+                ratesArr = filterCertainCurrency(ratesArr, onlyCurrencies);
 
-                    results.push({ date, base, ratesObj, ratesArr });
-                } catch (err) {
-                    if (!continueOnError) throw err;
-                    results.push({ date: current, base: undefined, ratesObj: undefined, ratesArr: [], error: String(err) });
-                }
+                results.push({ date, base, ratesObj, ratesArr });
+            } catch (err) {
+                if (!continueOnError) throw err;
+                results.push({ date: current, base: undefined, ratesObj: undefined, ratesArr: [], error: String(err) });
             }
-        };
+        }
+    };
 
-        const poolSize = Math.max(1, Math.min(concurrency, dates.length));
-        await Promise.all(Array.from({ length: poolSize }, worker));
+    const poolSize = Math.max(1, Math.min(concurrency, dates.length));
+    await Promise.all(Array.from({ length: poolSize }, worker));
 
-        results.sort((a, b) => String(a.date).localeCompare(String(b.date)));
-        return results;
-    });
+    results.sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    return results;
 }

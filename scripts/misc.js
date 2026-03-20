@@ -32,7 +32,7 @@ export function toggleActive(root, element, elementClass) {
   element.classList.add(elementClass);
 }
 
-export async function withLoading(promiseFn, elementClass=".loading") {
+export async function withLoading(promiseFn, elementClass=".loader") {
   pendingRequests++;
   setLoading(true, elementClass);
 

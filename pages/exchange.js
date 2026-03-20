@@ -1,5 +1,5 @@
 import { APIgetAvailableCurrencies, APIgetCurrencyRates, APIgetCurrencyRatesRange } from '../scripts/apiFacade.js';
-import { toggleActive } from '../scripts/misc.js';
+import { toggleActive, withLoading } from '../scripts/misc.js';
 import Chart from "https://cdn.jsdelivr.net/npm/chart.js@4.4.3/auto/+esm";
 
 function formatRate(value) {
@@ -22,7 +22,7 @@ function renderRates({ date, base, ratesArr }, selectedCurrencyCode) {
 
     const header = document.createElement('div');
     header.className = 'ratesHeader';
-    header.textContent = `Kursy dla ${selectedCurrencyCode?.toUpperCase()} (data: ${date}, baza: ${base?.toUpperCase()})`;
+    header.textContent = `Kursy dla ${selectedCurrencyCode?.toUpperCase()} (${date})`;
 
     const grid = document.createElement('div');
     grid.className = 'ratesGrid';
@@ -95,7 +95,7 @@ async function displayChartPopup(baseCurrency, selectedCurrency) {
         chart.destroy();
     }
 
-    let data = await APIgetCurrencyRatesRange(baseCurrency, "2026-03-01", "2026-03-10", undefined, {onlyCurrencies: [selectedCurrency]})
+    let data = await withLoading(async () => APIgetCurrencyRatesRange(baseCurrency, "2026-03-01", "2026-03-10", undefined, {onlyCurrencies: [selectedCurrency]}), ".loader");
 
     console.log(data);
 
@@ -103,7 +103,7 @@ async function displayChartPopup(baseCurrency, selectedCurrency) {
     const chartData = {
         labels: labels,
         datasets: [{
-            label: 'Wykres kursu',
+            label: `Cena jednostkowa waluty ${selectedCurrency.toUpperCase()}`,
             data: data.map(elem => elem.ratesArr[0].value),
             fill: false,
             borderColor: 'rgb(75, 192, 192)',
