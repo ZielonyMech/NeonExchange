@@ -1,4 +1,5 @@
 import { config } from './config/config.js'
+import { ArgumentError } from './errors.js';
 
 let pendingRequests = 0;
 
@@ -49,25 +50,33 @@ export async function withLoading(promiseFn, elementClass=".loader") {
   }
 }
 
-export function filterAvailableCurrencies(object) {
-  return object.filter(elem =>
-    config.supportedCurrencies.includes(elem.code)
-  );
-}
+/**
+ * @typedef {{ excludeCode?: string }} CurrencyFilterContext
+ * @typedef {{ onlyCodes?: string[] }} CurrencyCodeFilterContext
+ */
 
-export function filterAvailableCurrenciesWithohutSelf(object, self) {
-  return object.filter(elem =>
-    config.supportedCurrencies.includes(elem.code) && elem.code != self
-  );
-}
+/**
+ * Keeps rows whose `code` is in whitelist; optionally drops the base/excluded code.
+ *
+ * @param {Array<{ code: string }>} list
+ * @param {Array<{ string }>} [whitelist]
+ * @param {CurrencyFilterContext} [context]
+ */
+export function filterCurrenciesWhitelist(list, whitelist, context = {}) {
+  const { excludeCode } = context;
 
-export function filterCertainCurrency(list, onlyCodes = []) {
-  if (!Array.isArray(onlyCodes) || onlyCodes.length === 0) return list;
-
-  const allowed = new Set(onlyCodes.map(c => String(c).toLowerCase()));
+  if (!Array.isArray(whitelist) || whitelist.length === 0) throw new ArgumentError("Invalid whitelist!");
+  
+  whitelist = new Set(whitelist.map((elem) => elem.toLowerCase()))
 
   return list.filter((elem) => {
-    const code = typeof elem === "string" ? elem : elem?.code;
-    return allowed.has(String(code).toLowerCase());
+    const code = elem.code.toLowerCase();
+
+    if (!whitelist.has(code)) return false;
+    if (excludeCode && code === excludeCode.toLowerCase()) return false;
+
+    return true;
   });
 }
+
+export const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
