@@ -53,19 +53,34 @@ function buildCurrencyRatesUrl(currencyCode, isoDate) {
 * @returns {Promise<Array<{ code: string, name: string }>>}
 */
 export async function APIgetAvailableCurrencies(filterFn = filterCurrenciesWhitelist) {
-    const response = await fetch(config.endpoints.currencies);
-    const responseData = await response.json();
-    
-    let list = Object.keys(responseData).map((elem) => ({
-        code: elem,
-        name: responseData[elem],
-    }));
-    
-    let parsedData = filterFn ? filterFn(list, config.supportedCurrencies, {}) : list;
-    
-    return parsedData;
+    try {
+        const response = await fetch(config.endpoints.currencies);
+
+        if (!response.ok) {
+            throw new Error(`API responded with status ${response.status} ${response.statusText}`);
+        }
+
+        const responseData = await response.json();
+        
+        let list = Object.keys(responseData).map((elem) => ({
+            code: elem,
+            name: responseData[elem],
+        }));
+        
+        let parsedData = filterFn ? filterFn(list, config.supportedCurrencies, {}) : list;
+        
+        return parsedData;
+    }
+    catch (err) {
+        throw new Error(`Failed to fetch available currencies: ${err.message}`);
+    }
 }
 
+/**
+ * Parses the currency rate data from the API response.
+ * @param {Object} data - The API response data containing date and rates.
+ * @returns {Object} An object with date, baseCurrency, and ratesArr.
+ */
 function praseCurrencyRate(data) {
     const date = data.date;
 
@@ -78,18 +93,46 @@ function praseCurrencyRate(data) {
     return {date, baseCurrency, ratesArr};
 }
 
+/**
+ * Fetches currency rates for a specific currency code and optional date.
+ * @param {string} currencyCode - The base currency code (ISO 4217, three letters).
+ * @param {string|Date|null} [isoDate=null] - Optional date for historical rates (YYYY-MM-DD or Date object).
+ * @param {Function} [filterFn=filterCurrenciesWhitelist] - Optional filter function for the rates.
+ * @returns {Promise<Object>} A promise resolving to an object with date, baseCurrency, and ratesArr.
+ */
 export async function APIgetCurrencyRates(currencyCode, isoDate = null, filterFn = filterCurrenciesWhitelist) {
-    const response = await fetch(buildCurrencyRatesUrl(currencyCode, isoDate));
-    const responseData = await response.json();
+    try {
+        const response = await fetch(buildCurrencyRatesUrl(currencyCode, isoDate));
 
-    let { date, baseCurrency, ratesArr } = praseCurrencyRate(responseData);
+        if (!response.ok) {
+            throw new Error(`API responded with status ${response.status} ${response.statusText}`);
+        }
 
-    ratesArr = filterFn ? filterFn(ratesArr, config.supportedCurrencies, { excludeCode: currencyCode }) : ratesArr;
-
-    return { date, baseCurrency, ratesArr };  
+        const responseData = await response.json();
+    
+        let { date, baseCurrency, ratesArr } = praseCurrencyRate(responseData);
+    
+        ratesArr = filterFn ? filterFn(ratesArr, config.supportedCurrencies, { excludeCode: currencyCode }) : ratesArr;
+    
+        return { date, baseCurrency, ratesArr };  
+    }
+    catch (err) {
+        throw new Error(`Failed to fetch currency rates: ${err.message}`);
+    }
 }
 
-export async function APIgetCurrencyRatesRange(currencyCode, range = {startDate, endDate}, options = { concurrency: 4, continueOnError: false }) {
+/**
+ * Fetches currency rates for a range of dates with concurrency control.
+ * @param {string} currencyCode - The base currency code (ISO 4217, three letters).
+ * @param {Object} range - The date range object.
+ * @param {string} range.startDate - The start date (YYYY-MM-DD).
+ * @param {string} range.endDate - The end date (YYYY-MM-DD).
+ * @param {Object} [options={ concurrency: 4, continueOnError: false }] - Options for the fetch operation.
+ * @param {number} options.concurrency - Number of concurrent requests (default 4).
+ * @param {boolean} options.continueOnError - Whether to continue on errors (default false).
+ * @returns {Promise<Array<Object>>} A promise resolving to an array of rate objects sorted by date.
+ */
+export async function APIgetCurrencyRatesRange(currencyCode, range = {startDate, endDate}, options = { concurrency: 4, continueOnError: true }) {
     await sleep(2000);
 
     const { concurrency, continueOnError } = options
@@ -105,7 +148,6 @@ export async function APIgetCurrencyRatesRange(currencyCode, range = {startDate,
                 results.push({ date, baseCurrency, ratesArr });
             } catch (err) {
                 if (!continueOnError) throw err;
-                results.push({ date: current, base: undefined, ratesObj: undefined, ratesArr: [], error: String(err) });
             }
         }
     };

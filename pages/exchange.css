@@ -347,6 +347,7 @@ main {
 .availableCurrencies {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   gap: 0.75rem;
   justify-content: center;
 }
@@ -412,14 +413,15 @@ main {
   display: none !important;
 }
 
-.chartSection {
+.chartBody {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  height: 20rem;
   align-items: center;
-  justify-content: center;
-  width: 100%;
+  width: clamp(40vw, 60vw, 80vw);
+  height: clamp(40vh, 60vh, 80vh);
+  border-radius: 16px;
+  padding: 0;
+  background: #ffffff;
 }
 
 @keyframes rotation {

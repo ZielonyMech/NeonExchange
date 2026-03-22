@@ -2,9 +2,9 @@ import { ArgumentError } from "./errors.js";
 
 /**
  * Whether `dateLike` is usable as a date: a real calendar day in `YYYY-MM-DD` form,
- * a parseable date string, or a finite {@link Date}.
+ * a parseable date string, a finite {@link Date}, or milliseconds since Unix epoch.
  *
- * @param {string|Date} dateLike - Strict ISO day string, other parseable string, or {@link Date}.
+ * @param {string|Date|number} dateLike - Strict ISO day string, other parseable string, {@link Date}, or milliseconds since 1970.
  * @returns {boolean}
  */
 function checkISODateValidity(dateLike) {
@@ -30,6 +30,11 @@ function checkISODateValidity(dateLike) {
         return Number.isFinite(dateLike.getTime());
     }
 
+    if (typeof dateLike === "number") {
+        const parsed = new Date(dateLike);
+        return Number.isFinite(parsed.getTime());
+    }
+
     return false;
 }
 
@@ -37,7 +42,7 @@ function checkISODateValidity(dateLike) {
  * Normalizes a date-like value to an ISO calendar date string (`YYYY-MM-DD`).
  * Uses UTC when deriving from {@link Date} instances.
  *
- * @param {string|Date} dateLike - Date already in `YYYY-MM-DD` format, a parseable date string, or a {@link Date}.
+ * @param {string|Date|number} dateLike - Date already in `YYYY-MM-DD` format, a parseable date string, a {@link Date}, or milliseconds since 1970.
  * @returns {string} Date in `YYYY-MM-DD` format.
  * @throws {ArgumentError} If the string cannot be parsed, the {@link Date} is invalid, or the type is unsupported.
  */
@@ -53,13 +58,13 @@ function toISODate(dateLike) {
         return new Date(dateLike).toISOString().slice(0, 10);
     }
 
-    return dateLike.toISOString().slice(0, 10);
+    return new Date(dateLike).toISOString().slice(0, 10);
 }
 
 /**
  * Adds a number of calendar days to an ISO date string, in UTC.
  *
- * @param {string|Date} isoDate - Start date as `YYYY-MM-DD`, a parseable date string, or a {@link Date}.
+ * @param {string|Date|number} isoDate - Start date as `YYYY-MM-DD`, a parseable date string, a {@link Date}, or milliseconds since 1970.
  * @param {number} days - Number of days to add (negative to subtract).
  * @returns {string} Resulting date as `YYYY-MM-DD`.
  */
@@ -74,9 +79,9 @@ function addDaysISO(isoDate, days) {
 /**
  * Constructs array of ISO dates from specified Range
  *
- * @param {string|Date} isoStartDate - Start date as `YYYY-MM-DD`, a parseable date string, or a {@link Date}.
- * @param {string|Date} isoEndDate - End date as `YYYY-MM-DD`, a parseable date string, or a {@link Date}.
- * @returns {string} Resulting date array in format `YYYY-MM-DD`.
+ * @param {string|Date|number} isoStartDate - Start date as `YYYY-MM-DD`, a parseable date string, a {@link Date}, or milliseconds since 1970.
+ * @param {string|Date|number} isoEndDate - End date as `YYYY-MM-DD`, a parseable date string, a {@link Date}, or milliseconds since 1970.
+ * @returns {string[]} Resulting date array in format `YYYY-MM-DD`.
  */
 function getDateRange(isoStartDate, isoEndDate) {
     const startISO = toISODate(isoStartDate);

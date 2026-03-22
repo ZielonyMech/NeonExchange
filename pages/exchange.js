@@ -1,4 +1,5 @@
 import { APIgetAvailableCurrencies, APIgetCurrencyRates, APIgetCurrencyRatesRange } from '../scripts/apiFacade.js';
+import { addDaysISO, toISODate } from '../scripts/dataParser.js';
 import { toggleActive, withLoading } from '../scripts/misc.js';
 import Chart from "https://cdn.jsdelivr.net/npm/chart.js@4.4.3/auto/+esm";
 
@@ -85,17 +86,44 @@ function createCurrencyElement(root, currency) {
 }
 
 var chart = null;
+const ctx = document.querySelector('.currencyChart');
+
+let currentBaseCurrency = null;
+let currentSelectedCurrency = null;
+let currencyRate = null;
 
 async function displayChartPopup(baseCurrency, selectedCurrency) {
-    console.log(`${baseCurrency} -> ${selectedCurrency}`)
+    const dialog = document.querySelector('#chartDialog');
+    dialog.showModal();
 
-    const ctx = document.querySelector('.currencyChart');
+    const title = dialog.querySelector('.chartTitle');
+    title.textContent = `Kurs 1 ${baseCurrency.toUpperCase()} -> ${selectedCurrency.toUpperCase()}`;
 
-    if(chart) {
-        chart.destroy();
+    currentBaseCurrency = baseCurrency;
+    currentSelectedCurrency = selectedCurrency;
+
+    const startDateInput = document.querySelector('.startDate');
+    const endDateInput = document.querySelector('.endDate');
+
+    if (!startDateInput.value) {
+        startDateInput.value = toISODate(addDaysISO(Date.now(), -7));
+    }
+    if (!endDateInput.value) {
+        endDateInput.value = toISODate(Date.now());
     }
 
-    let data = await withLoading(async () => APIgetCurrencyRatesRange(baseCurrency, "2026-03-01", "2026-03-10", undefined, {onlyCurrencies: [selectedCurrency]}), ".loader");
+    const range = {
+        startDate: startDateInput.value,
+        endDate: endDateInput.value
+    };
+
+    renderChart(baseCurrency, selectedCurrency, range);
+}
+
+async function renderChart(baseCurrency, selectedCurrency, range) {
+    if(chart) chart.destroy();
+
+    let data = await withLoading(async () => APIgetCurrencyRatesRange(baseCurrency, range), ".loader");
 
     console.log(data);
 
@@ -104,7 +132,10 @@ async function displayChartPopup(baseCurrency, selectedCurrency) {
         labels: labels,
         datasets: [{
             label: `Cena jednostkowa waluty ${selectedCurrency.toUpperCase()}`,
-            data: data.map(elem => elem.ratesArr[0].value),
+            data: data.map(elem => {
+                const rate = elem.ratesArr.find(r => r.code === selectedCurrency);
+                return rate ? rate.value : null;
+            }),
             fill: false,
             borderColor: 'rgb(75, 192, 192)',
             tension: 0.1
@@ -113,9 +144,45 @@ async function displayChartPopup(baseCurrency, selectedCurrency) {
 
     chart = new Chart(ctx, {
         type: 'line',
-        data: chartData
+        data: chartData,
+        options: {
+            onClick: (event, elements) => {
+                if (elements.length > 0) {
+                    const dataIndex = elements[0].index;
+                    const datasetIndex = elements[0].datasetIndex;
+                    const value = chart.data.datasets[datasetIndex].data[dataIndex];
+                    
+                    currencyRate = value;
+                }
+        },
+        }
     });
 }
+
+document.querySelector('.startDate').addEventListener('change', (e) => {
+    if (currentBaseCurrency && currentSelectedCurrency) {
+        const startDate = e.target.value;
+        const endDate = document.querySelector('.endDate').value;
+        renderChart(currentBaseCurrency, currentSelectedCurrency, { startDate, endDate });
+    }
+});
+
+document.querySelector('.endDate').addEventListener('change', (e) => {
+    if (currentBaseCurrency && currentSelectedCurrency) {
+        const startDate = document.querySelector('.startDate').value;
+        const endDate = e.target.value;
+        renderChart(currentBaseCurrency, currentSelectedCurrency, { startDate, endDate });
+    }
+});
+
+document.querySelector('.chartCurrencyAmount').addEventListener('input', (e) => {
+    const amount = Number(e.target.value);
+    const displaySpan = document.querySelector('.chartCurrencyValue');
+    
+    if (chart && !isNaN(amount)) {
+        displaySpan.innerHTML = (amount * currencyRate).toFixed(2) + ` ${currentSelectedCurrency.toUpperCase()}`;
+    }
+});
 
 const currencyInput = document.querySelector('#currency');
 

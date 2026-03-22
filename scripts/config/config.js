@@ -5,12 +5,9 @@ export const config = {
         currencies: "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies.json"
     },
     supportedCurrencies: [
-        "eur",
-        "pln",
-        "czk",
-        "usd",
-        "gbp",
-        "chf",
+        "usd", "eur", "jpy", "gbp", "chf", "cad", "aud", "sek", "nok", "dkk",
+        "sgd", "hkd", "krw", "nzd", "zar", "brl", "mxn", "inr", "rub", "cny",
+        "pln", "czk"
     ]
 }
 
