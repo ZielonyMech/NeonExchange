@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="./login.css" rel="stylesheet">
+    <script src="../../../scripts/bootstrap.js" type="module"></script>
+    <script src="../../../scripts/components/hamburger.js" type="module" defer></script>
+    <title>Logowanie</title>
+</head>
+<body>
+    <header class="header">
+        
+    </header>
+
+    <main>
+        <section class="login-section">
+            <div class="login-container">
+                <h2>Logowanie</h2>
+                <form action="/api/auth/login" method="POST" class="login-form">
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Hasło:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn">Zaloguj się</button>
+                </form>
+                <p class="register-link">Nie masz konta? <a href="./register/register.html">Zarejestruj się</a></p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-inner">
+            <p>&copy; 2026 NeonExchange. Wszelkie prawa zastrzeżone.</p>
+            <p><a href="#contact">Kontakt</a> · <a href="#about">O nas</a> · <a href="#privacy">Polityka prywatności</a></p>
+        </div>
+    </footer>
+</body>
+</html>

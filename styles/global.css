@@ -1,0 +1,6 @@
+body {
+    display: grid;
+    grid-template-columns: minmax(16px, 1fr) minmax(0, 1200px) minmax(16px, 1fr);
+    margin: 0;
+    box-sizing: border-box;
+}

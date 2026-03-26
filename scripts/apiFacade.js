@@ -1,6 +1,6 @@
 import { config } from './config/config.js';
 import { sleep, filterCurrenciesWhitelist } from './misc.js';
-import { toISODate, checkISODateValidity, getDateRange } from './dataParser.js';
+import { toISODate, checkISODateValidity, getDateRange } from './ISODataParser.js';
 import { ArgumentError } from './errors.js';
 
 /**

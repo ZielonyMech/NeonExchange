@@ -8,7 +8,13 @@ export const config = {
         "usd", "eur", "jpy", "gbp", "chf", "cad", "aud", "sek", "nok", "dkk",
         "sgd", "hkd", "krw", "nzd", "zar", "brl", "mxn", "inr", "rub", "cny",
         "pln", "czk"
-    ]
+    ],
+    currentLocale: "pl-PL",
+    supportedLocales: ["en-GB", "ru-RU", "pl-PL"],
 }
 
-export default config;
+export const components = {
+    header: '/components/header/header.html'
+}
+
+export default { config, components };

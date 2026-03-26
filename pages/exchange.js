@@ -1,19 +1,8 @@
 import { APIgetAvailableCurrencies, APIgetCurrencyRates, APIgetCurrencyRatesRange } from '../scripts/apiFacade.js';
-import { addDaysISO, toISODate } from '../scripts/dataParser.js';
+import { addDaysISO, toISODate } from '../scripts/ISODataParser.js';
 import { toggleActive, withLoading } from '../scripts/misc.js';
+import { formatRate } from '../scripts/dataParser.js';
 import Chart from "https://cdn.jsdelivr.net/npm/chart.js@4.4.3/auto/+esm";
-
-function formatRate(value) {
-    const num = Number(value);
-    if (!Number.isFinite(num)) return String(value);
-    if (num === 0) return '0';
-
-    const abs = Math.abs(num);
-    if (abs < 0.0001) return num.toExponential(4);
-    if (abs < 1) return num.toFixed(6);
-    if (abs < 1000) return num.toFixed(4);
-    return num.toLocaleString(undefined, { maximumFractionDigits: 4 });
-}
 
 function renderRates({ date, base, ratesArr }, selectedCurrencyCode) {
     const container = document.querySelector('.exchangeRates');
@@ -55,8 +44,14 @@ function renderRates({ date, base, ratesArr }, selectedCurrencyCode) {
 }
 
 async function getCurrencyRates(currency) {
-    const exchangeValues = await APIgetCurrencyRates(currency);
-    renderRates(exchangeValues, currency);
+    try {
+        const exchangeValues = await APIgetCurrencyRates(currency);
+        renderRates(exchangeValues, currency);
+    }
+    catch (err) {
+        //tu miejsce na takiego popupa i wyswietlenie ponowienia requesta
+        console.log("wiwi");
+    }
 }
 
 async function searchCurrency(value) {
@@ -124,8 +119,6 @@ async function renderChart(baseCurrency, selectedCurrency, range) {
     if(chart) chart.destroy();
 
     let data = await withLoading(async () => APIgetCurrencyRatesRange(baseCurrency, range), ".loader");
-
-    console.log(data);
 
     const labels = data.map(elem => elem.date);
     const chartData = {
