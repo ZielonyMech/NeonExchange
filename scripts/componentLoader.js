@@ -1,20 +1,23 @@
-export async function loadComponent(componentPath, target, event = null) {
+export async function loadComponent(root, componentPath, componentName, componentClass) {
+    if (customElements.get(componentName)) {
+        return;
+    }
+
     const res = await fetch(componentPath);
 
     if (!res.ok) {
-        throw new Error(`Failed to load component: ${componentPath}`);
+        throw new Error(`Failed to load component: ${res.statusText}`);
     }
 
     const html = await res.text();
-    const container = document.querySelector(target);
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const importedTemplate = doc.querySelector(`template#${componentName}-template`);
 
-    if (!container) {
-        throw new Error(`Target element not found: ${target}`);
+    if (!importedTemplate) {
+        throw new Error(`${componentName} template not found in ${componentPath}`);
     }
 
-    container.innerHTML = html;
-
-    if (event) {
-        event(container.target);
-    }
+    root.innerHTML = importedTemplate.innerHTML;
+    customElements.define(componentName, componentClass);
 }
