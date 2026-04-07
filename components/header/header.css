@@ -3,17 +3,7 @@
     width: 100%;
 }
 
-header, .header {
-    grid-column: 1 / -1;
-     width: 100%;
-    background: #00457c;
-    padding: 10px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    box-sizing: border-box;
-    position: relative;
-}
+
 
 .header-inner {
   max-width: 1200px;
