@@ -1,6 +1,39 @@
 body {
-    display: grid;
-    grid-template-columns: minmax(16px, 1fr) minmax(0, 1200px) minmax(16px, 1fr);
-    margin: 0;
+  display: grid;
+  grid-template-columns: minmax(16px, 1fr) minmax(0, 1200px) minmax(16px, 1fr);
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+app-header, main, footer {
+  grid-column: 1 / -1;
+}
+
+app-header {
+    width: 100%;
+    background: #00457c;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
     box-sizing: border-box;
+    position: relative;
+}
+
+main {
+    grid-column: 2;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+footer {
+    width: 100%;
+    padding: 8px 0;
+    background-color: #f1f1f1;
+    color: #333;
+    margin-top: 20px;
+    box-shadow: inset 0 1px 0 rgba(0,0,0,0.05);
 }

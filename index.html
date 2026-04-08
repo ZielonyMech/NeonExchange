@@ -3,6 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="preload" href="components/header/header.html" as="fetch" crossorigin>
         <link href="index.css" rel="stylesheet">
         <script src="/scripts/bootstrap.js" type="module"></script>
         <title>Strona kantor</title>
@@ -10,22 +11,22 @@
     <body>
         <app-header class="header"></app-header>
 
-        <main class="hero" id="home">
+        <main id="home">
             <h1>Wymieniaj waluty błyskawicznie</h1>
             <p class="hero-subtitle">Szybko, bezpiecznie i najkorzystniej — wszystkie kursy w jednym miejscu.</p>
             <a href="pages/exchange.html" id="checkRatesBtn" class="cta-btn">Sprawdź kursy</a>
+            
+            <section class="rates" id="rates">
+                <h2>Aktualne kursy</h2>
+                <div class="course-list">
+                    <div class="course-item"><span>USD / PLN</span><strong>4.12</strong></div>
+                    <div class="course-item"><span>EUR / PLN</span><strong>4.51</strong></div>
+                    <div class="course-item"><span>GBP / PLN</span><strong>5.28</strong></div>
+                </div>
+            </section>
         </main>
 
-        <section class="rates" id="rates">
-            <h2>Aktualne kursy</h2>
-            <div class="course-list">
-                <div class="course-item"><span>USD / PLN</span><strong>4.12</strong></div>
-                <div class="course-item"><span>EUR / PLN</span><strong>4.51</strong></div>
-                <div class="course-item"><span>GBP / PLN</span><strong>5.28</strong></div>
-            </div>
-        </section>
-
-        <footer class="footer">
+        <footer>
             <div class="footer-inner">
                 <p>&copy; 2026 NeonExchange. Wszelkie prawa zastrzeżone.</p>
                 <p><a href="#contact">Kontakt</a> · <a href="#about">O nas</a> · <a href="#privacy">Polityka prywatności</a></p>
