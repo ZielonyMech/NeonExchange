@@ -1,3 +1,5 @@
+import { loggedUser } from "/scripts/globalState.js";
+
 const crypto = window.crypto
 
 async function register(event) {
@@ -20,12 +22,12 @@ async function register(event) {
     }
 
     if (checkUserExists(email.value)) {
-        alert('Użytkownik o podanym emailu już istnieje!');
         return;
     }
 
     registerUser(newUser);
     alert('Rejestracja zakończona sukcesem! Możesz teraz się zalogować.');
+    document.location.href = '/pages/auth/login/login.html';
 }
 
 export async function hashSomething(text, algorithm) {

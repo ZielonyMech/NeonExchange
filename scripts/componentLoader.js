@@ -1,4 +1,4 @@
-export async function loadComponent(root, componentPath, componentName, componentClass) {
+export async function loadComponent(componentPath, componentName, componentClass) {
     if (customElements.get(componentName)) {
         return;
     }
@@ -18,6 +18,8 @@ export async function loadComponent(root, componentPath, componentName, componen
         throw new Error(`${componentName} template not found in ${componentPath}`);
     }
 
-    root.innerHTML = importedTemplate.innerHTML;
+    const template = document.createElement('template');
+    template.innerHTML = importedTemplate.innerHTML;
+    
     customElements.define(componentName, componentClass);
 }

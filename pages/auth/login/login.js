@@ -1,3 +1,4 @@
+import { setLoggedUser, loggedUser } from "/scripts/globalState.js";
 import { hashSomething } from "/pages/auth/register/register.js";
 
 const crypto = window.crypto;
@@ -19,7 +20,9 @@ async function loginUser(user) {
 
     if (foundUser && foundUser.password === hashedPassword) {
         alert('Logowanie zakończone sukcesem!');
-        return
+        setLoggedUser(foundUser);
+        console.log(loggedUser);
+        return;
     }
 
     alert('Nieprawidłowy email lub hasło!');
