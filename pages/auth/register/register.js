@@ -1,5 +1,3 @@
-import { loggedUser } from "/scripts/globalState.js";
-
 const crypto = window.crypto
 
 async function register(event) {
@@ -40,11 +38,6 @@ function registerUser(user) {
     const savedUsers = JSON.parse(localStorage.getItem('users')) || [];
     savedUsers.push(user);
     localStorage.setItem('users', JSON.stringify(savedUsers));
-}
-
-export function checkUserExists(email) {
-    const savedUsers = JSON.parse(localStorage.getItem('users')) || [];
-    return savedUsers.some(user => user.email === email);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
