@@ -1,5 +1,5 @@
 import { setLoggedUser } from "/scripts/globalState.js";
-import { hashSomething } from "/pages/auth/register/register.js";
+import { hashSomething } from "/scripts/utils/auth.js";
 
 const crypto = window.crypto;
 

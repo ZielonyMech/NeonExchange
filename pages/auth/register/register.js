@@ -1,3 +1,4 @@
+import { hashSomething, checkUserExists } from "/scripts/utils/auth.js"
 const crypto = window.crypto
 
 async function register(event) {
@@ -26,12 +27,6 @@ async function register(event) {
     registerUser(newUser);
     alert('Rejestracja zakończona sukcesem! Możesz teraz się zalogować.');
     document.location.href = '/pages/auth/login/login.html';
-}
-
-export async function hashSomething(text, algorithm) {
-    const hashedValue = await crypto.subtle.digest(algorithm, new TextEncoder().encode(text));
-
-    return Array.from(new Uint8Array(hashedValue)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 function registerUser(user) {
