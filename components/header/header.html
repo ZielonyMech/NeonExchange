@@ -6,7 +6,7 @@
 
         .header {
             width: 100%;
-            background: #00457c;
+            background: #151515;
             padding: 10px 20px;
             display: flex;
             align-items: center;
@@ -31,7 +31,7 @@
             right: 0;
             left: auto;
             width: 200px;
-            background: #00457c;
+            background: #151515;
             border-radius: 6px;
             box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
             display: flex;
@@ -70,10 +70,9 @@
             border-radius: 4px;
         }
 
-        .nav-menu a:hover {
-            background: rgba(255,255,255,0.1);
-            text-decoration: none;
-        }
+       .nav-menu a:hover {
+  background: #ffffff33;
+}
 
         .hamburger {
             width: 32px;
@@ -97,15 +96,21 @@
         }
 
         .brand {
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 700;
-            color: white;
+            color: #0ac9d7;
+            text-shadow:
+    0 0 16px rgb(10, 201, 215, 0.4),
+    0 0 16px rgb(10, 201, 215, 0.4),
+    0 0 16px rgb(10, 201, 215, 0.4),
+    0 0 16px rgb(10, 201, 215, 0.4),
+    0 0 16px rgb(10, 201, 215, 0.4);
         }
     </style>
 
     <header class="header">
         <div class="header-inner">
-            <div class="brand"><slot name="brand">NeonExchange</slot></div>
+            <div class="brand"><slot name="brand">NeonExchange🔄</slot></div>
             <button class="hamburger" id="hamburger" aria-label="Przełącz menu" aria-expanded="false">
                 <span></span>
                 <span></span>
