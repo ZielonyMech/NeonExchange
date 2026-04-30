@@ -1,5 +1,5 @@
 import { setLoggedUser } from "/scripts/globalState.js";
-import { hashSomething } from "/scripts/utils/auth.js";
+import { hashSomething, getUser } from "/scripts/utils/auth.js";
 
 const crypto = window.crypto;
 
@@ -13,8 +13,7 @@ async function loginSubmit(event) {
 }
 
 async function loginUser(user) {
-    const savedUsers = JSON.parse(localStorage.getItem('users')) || [];
-    const foundUser = savedUsers.find(u => u.email === user.email);
+    const foundUser = getUser(user.email);
 
     const hashedPassword = await hashSomething(user.password, 'SHA-512');
 

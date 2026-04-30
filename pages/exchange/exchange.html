@@ -6,7 +6,7 @@
     <title>Kursy walut</title>
     <link href="./exchange.css" rel="stylesheet"> 
     <script src="./exchange.js" type="module"></script>
-    <script src="../scripts/bootstrap.js" type="module"></script>
+    <script src="/scripts/bootstrap.js" type="module"></script>
 </head>
 <body>
     <app-header></app-header>
@@ -41,6 +41,7 @@
 
                     <input type="number" class="chartCurrencyAmount" placeholder="Ilość waluty">
                     <label for="chartCurrencyAmount">Ilość waluty</label>
+                    <button class="buyButton" disabled>Kup</button>
 
                     <span class="chartCurrencyValue"></span>
                 </div>
@@ -58,3 +59,25 @@
     </footer>
 </body>
 </html>
+
+<template id="currencyCard">
+    <div class="currencyCard">
+        <span class="currencyName">
+            <slot name="name">Default Name</slot>
+        </span>
+        <span class="currencyCode">
+            <b>(<slot name="code">Default Code</slot>)</b>
+        </span>
+    </div>
+</template>
+
+<template id="currencyRateCard">
+    <div class="currencyCard">
+        <span class="currencyName">
+            <slot name="name">Default Name</slot>
+        </span>
+        <span class="currencyRate">
+            <b><slot name="rate">Default Rate</slot></b>
+        </span>
+    </div>
+</template>

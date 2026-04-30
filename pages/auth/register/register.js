@@ -18,6 +18,8 @@ async function register(event) {
     const newUser = {
         email: email.value,
         password: hashedPassword,
+        balance: 1000,
+        ownedAssets: []
     }
 
     if (checkUserExists(email.value)) {

@@ -1,7 +1,8 @@
-import { APIgetAvailableCurrencies, APIgetCurrencyRates, APIgetCurrencyRatesRange } from '../scripts/apiFacade.js';
-import { addDaysISO, toISODate } from '../scripts/ISODataParser.js';
-import { toggleActive, withLoading } from '../scripts/misc.js';
-import { formatRate } from '../scripts/dataParser.js';
+import { APIgetAvailableCurrencies, APIgetCurrencyRates, APIgetCurrencyRatesRange } from '/scripts/apiFacade.js';
+import { addDaysISO, toISODate } from '/scripts/ISODataParser.js';
+import { toggleActive, withLoading } from '/scripts/misc.js';
+import { formatRate } from '/scripts/dataParser.js';
+import { getLoggedUser, syncLoggedUser } from '/scripts/globalState.js';
 import Chart from "https://cdn.jsdelivr.net/npm/chart.js@4.4.3/auto/+esm";
 
 function renderRates({ date, base, ratesArr }, selectedCurrencyCode) {
@@ -19,25 +20,9 @@ function renderRates({ date, base, ratesArr }, selectedCurrencyCode) {
 
     const frag = document.createDocumentFragment();
 
-    [...ratesArr]
-        .sort((a, b) => a.code.localeCompare(b.code))
-        .forEach(({ code, value }) => {
-            const card = document.createElement('div');
-            card.className = 'rateCard';
-            card.dataset.code = code;
-            card.onclick = () => displayChartPopup(selectedCurrencyCode, code);
-
-            const codeEl = document.createElement('div');
-            codeEl.className = 'rateCode';
-            codeEl.textContent = code.toUpperCase();
-
-            const valueEl = document.createElement('div');
-            valueEl.className = 'rateValue';
-            valueEl.textContent = formatRate(value);
-
-            card.append(codeEl, valueEl);
-            frag.appendChild(card);
-        });
+    [...ratesArr].forEach((rateObj) => {
+        frag.appendChild(createRateCard(grid, rateObj, selectedCurrencyCode));
+    });
 
     grid.appendChild(frag);
     container.append(header, grid);
@@ -50,6 +35,7 @@ async function getCurrencyRates(currency) {
     }
     catch (err) {
         //tu miejsce na takiego popupa i wyswietlenie ponowienia requesta
+        console.log(err);
         console.log("wiwi");
     }
 }
@@ -63,21 +49,44 @@ async function searchCurrency(value) {
     const filteredCurrencies = currencies.filter(currency => currency.name.toLowerCase().trim().includes(value.toLowerCase().trim()));
 
     filteredCurrencies.forEach(currency => {
-        currenciesContainer.appendChild(createCurrencyElement(currenciesContainer, currency));
+        currenciesContainer.appendChild(createCurrencyCard(currenciesContainer, currency));
     });
 }
 
-function createCurrencyElement(root, currency) {
-    const currencyElement = document.createElement('div');
-    currencyElement.className = 'currencyCard';
-    currencyElement.innerHTML = `${currency.name}<br>(${currency.code.toUpperCase()}) `;
+function createCurrencyCard(root, currency) {
+    const template = document.querySelector('#currencyCard');
+    const currencyElement = template.content.cloneNode(true);
+    const parent = currencyElement.querySelector('.currencyCard');
 
-    currencyElement.addEventListener('click', (elem) => {       
-        toggleActive(root, elem.target, "selected");
+    currencyElement.querySelector('slot[name="name"]').textContent = currency.name;
+    currencyElement.querySelector('slot[name="code"]').textContent = currency.code.toUpperCase();
+
+    parent.addEventListener('click', (elem) => {     
+        toggleActive(root, parent, "selected");
         getCurrencyRates(currency.code);
     });
 
     return currencyElement;
+}
+
+function createRateCard(root, rate, selectedCurrencyCode) {
+    const template = document.querySelector('#currencyRateCard');
+    const rateCard = template.content.cloneNode(true);
+
+    const parent = rateCard.querySelector('.currencyCard');
+    const cardHeader = rateCard.querySelector('slot[name="name"]');
+    const cardContent = rateCard.querySelector('slot[name="rate"]');
+
+    parent.className = 'rateCard';
+    parent.onclick = () => displayChartPopup(selectedCurrencyCode, rate.code);
+
+    cardHeader.className = 'rateCode';
+    cardHeader.textContent = rate.code.toUpperCase();
+
+    cardContent.className = 'rateValue';
+    cardContent.textContent = formatRate(rate.value);
+
+    return rateCard;
 }
 
 var chart = null;
@@ -112,8 +121,17 @@ async function displayChartPopup(baseCurrency, selectedCurrency) {
         endDate: endDateInput.value
     };
 
+    if (getLoggedUser()) {
+        document.querySelector('.buyButton').disabled = false;
+    }
+    else {
+        document.querySelector('.buyButton').disabled = true;
+    }
+
     renderChart(baseCurrency, selectedCurrency, range);
 }
+
+let selectedPoint = null;
 
 async function renderChart(baseCurrency, selectedCurrency, range) {
     if(chart) chart.destroy();
@@ -129,6 +147,8 @@ async function renderChart(baseCurrency, selectedCurrency, range) {
                 const rate = elem.ratesArr.find(r => r.code === selectedCurrency);
                 return rate ? rate.value : null;
             }),
+            pointBackgroundColor: (ctx) => ctx.dataIndex === selectedPoint ? 'red' : 'blue',
+            pointRadius: (ctx) => ctx.dataIndex === selectedPoint ? 8 : 4,
             fill: false,
             borderColor: 'rgb(75, 192, 192)',
             tension: 0.1
@@ -146,6 +166,9 @@ async function renderChart(baseCurrency, selectedCurrency, range) {
                     const value = chart.data.datasets[datasetIndex].data[dataIndex];
                     
                     currencyRate = value;
+                    selectedPoint = dataIndex;
+                    
+                    chart.update();
                 }
         },
         }
@@ -184,5 +207,38 @@ if (currencyInput) {
         searchCurrency(e.target.value);
     });
 }
+
+function buyAsset(event) {
+    console.log(event);
+    const amountInput = document.querySelector('.chartCurrencyAmount');
+    const amount = Number(amountInput.value);
+    
+    if (isNaN(amount) || amount <= 0) {
+        alert("Podaj poprawną ilość do kupienia!");
+        return;
+    }
+
+    const loggedUser = getLoggedUser();
+    if (!loggedUser) {
+        alert("Musisz być zalogowany, aby kupić tę walutę!");
+        return;
+    }
+
+    const boughtAsset = {
+        name: currentSelectedCurrency.toUpperCase(),
+        quantity: amount,
+        value: (amount * currencyRate).toFixed(2),
+        buyDate: new Date().toISOString()
+    }
+
+    loggedUser.ownedAssets.push(boughtAsset);
+    loggedUser.balance -= boughtAsset.value;
+
+    syncLoggedUser(loggedUser);
+
+    alert(`Kupiłeś ${amount} ${currentSelectedCurrency.toUpperCase()} za ${boughtAsset.value} PLN!`);
+}
+
+document.querySelector('.buyButton').addEventListener('click', buyAsset);   
 
 searchCurrency("");
