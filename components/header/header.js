@@ -1,3 +1,5 @@
+import { getLoggedUser } from "/scripts/globalState.js"
+
 export class AppHeader extends HTMLElement {
     constructor() {
         super();
@@ -19,6 +21,17 @@ export class AppHeader extends HTMLElement {
         if (headerTemplate.innerHTML && !this.shadowRoot.innerHTML) {
             this.shadowRoot.appendChild(headerTemplate.content.cloneNode(true));
             this.initHamburger();
+
+            let loginLink = this.shadowRoot.querySelector("#loginLink");
+
+            if (getLoggedUser()) {
+                loginLink.innerHTML = "Panel użytkownika";
+                loginLink.href = "/pages/userPanel/userPanel.html";
+            }
+            else {
+                loginLink.innerHTML = "Logowanie";
+                loginLink.href = "/pages/auth/login/login.html";
+            }
         }
     }
 

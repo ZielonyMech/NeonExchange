@@ -1,5 +1,4 @@
-import { loggedUser } from "/scripts/globalState.js";
-
+import { hashSomething, checkUserExists } from "/scripts/utils/auth.js"
 const crypto = window.crypto
 
 async function register(event) {
@@ -30,21 +29,10 @@ async function register(event) {
     document.location.href = '/pages/auth/login/login.html';
 }
 
-export async function hashSomething(text, algorithm) {
-    const hashedValue = await crypto.subtle.digest(algorithm, new TextEncoder().encode(text));
-
-    return Array.from(new Uint8Array(hashedValue)).map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
 function registerUser(user) {
     const savedUsers = JSON.parse(localStorage.getItem('users')) || [];
     savedUsers.push(user);
     localStorage.setItem('users', JSON.stringify(savedUsers));
-}
-
-export function checkUserExists(email) {
-    const savedUsers = JSON.parse(localStorage.getItem('users')) || [];
-    return savedUsers.some(user => user.email === email);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
