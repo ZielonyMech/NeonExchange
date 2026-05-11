@@ -13,7 +13,7 @@ app-header, main, footer {
 
 app-header {
     width: 100%;
-    background: #00457c;
+    background: #151515;
     padding: 10px 20px;
     display: flex;
     align-items: center;
