@@ -96,6 +96,11 @@ let currentBaseCurrency = null;
 let currentSelectedCurrency = null;
 let currencyRate = null;
 
+function clearDialogInputs() {
+    const chartInput = document.querySelector('.chartCurrencyAmount');
+    chartInput.textContent = "";
+}
+
 async function displayChartPopup(baseCurrency, selectedCurrency) {
     const dialog = document.querySelector('#chartDialog');
     dialog.showModal();
@@ -173,6 +178,10 @@ async function renderChart(baseCurrency, selectedCurrency, range) {
         },
         }
     });
+
+    selectedPoint = data.length - 1;
+    const lastRate = data[selectedPoint].ratesArr.find(r => r.code === selectedCurrency);
+    currencyRate = lastRate ? lastRate.value : null;
 }
 
 document.querySelector('.startDate').addEventListener('change', (e) => {
@@ -191,8 +200,8 @@ document.querySelector('.endDate').addEventListener('change', (e) => {
     }
 });
 
-document.querySelector('.chartCurrencyAmount').addEventListener('input', (e) => {
-    const amount = Number(e.target.value);
+document.querySelector('#calculateCurrency').addEventListener('click', (e) => {
+    const amount = Number(document.querySelector('.chartCurrencyAmount').value);
     const displaySpan = document.querySelector('.chartCurrencyValue');
     
     if (chart && !isNaN(amount)) {
@@ -221,6 +230,12 @@ function buyAsset(event) {
     const loggedUser = getLoggedUser();
     if (!loggedUser) {
         alert("Musisz być zalogowany, aby kupić tę walutę!");
+        return;
+    }
+
+    const buyValue = (amount * currencyRate).toFixed(2);
+    if(buyValue > loggedUser.balance) {
+        alert("Brak wystarczających środków do zakupu waluty!");
         return;
     }
 
