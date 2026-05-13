@@ -17,6 +17,8 @@
         <div class="userDetails">
             <span id="username"></span>
             <span id="balance"></span>
+            <span id="userCurrency"></span>
+            <button id="logout">Wyloguj się</button>
         </div>
 
         <section class="assetContainer">
@@ -33,7 +35,7 @@
         <span class="assetQuantity">Ilość <slot name="quantity"></slot></span>
         <span class="assetBuyDate"><slot name="buyDate"></slot></span>
         <span class="assetCurrentValue"><slot name="currentValue"></slot></span>
-        <span class="assetBuyPrice">Cena zakupu <slot name="buyPrice"></slot></span>
+        <span class="assetBuyPrice">Wartość w dniu zakupu <slot name="buyPrice"></slot></span>
         <div class="compareSlot">
             <span class="assetComparePercent"><slot name="assetComparePercent"></slot></span>
             <span class="assetCompareDifference"><slot name="assetCompareDifference"></slot></span>

@@ -25,3 +25,10 @@ export function syncLoggedUser(updatedUser) {
     localStorage.setItem('loggedUser', JSON.stringify(updatedUser));
     localStorage.setItem('users', JSON.stringify(siteUsers));
 }
+
+export function logoutCurrentUser() {
+    const loggedUser = getLoggedUser();
+    syncLoggedUser(loggedUser);
+
+    localStorage.removeItem('loggedUser');
+}

@@ -1,4 +1,4 @@
-import { getLoggedUser, syncLoggedUser } from '/scripts/globalState.js';
+import { getLoggedUser, syncLoggedUser, logoutCurrentUser } from '/scripts/globalState.js';
 import { APIgetCurrencyRates } from '/scripts/apiFacade.js';
 
 window.addEventListener('load', async () => {
@@ -9,15 +9,19 @@ window.addEventListener('load', async () => {
         return;
     }
 
+    document.querySelector('#logout').addEventListener('click', logout);
+
     renderOwnedAssets(loggedUser);
 });
 
 async function renderOwnedAssets(loggedUser) {
     const usernameElement = document.querySelector('#username');
     const balanceElement = document.querySelector('#balance');
+    const userCurrency = document.querySelector('#userCurrency');
 
-    usernameElement.textContent = loggedUser.username;
+    usernameElement.textContent = loggedUser.email;
     balanceElement.textContent = `Saldo: ${loggedUser.balance} PLN`;
+    userCurrency.textContent = `Waluta użytkownika: ${loggedUser.userCurrency}`;
 
     if (loggedUser.ownedAssets.length > 0) {
         const assetsContainer = document.querySelector('.assetsList');
@@ -37,9 +41,17 @@ async function getTodayCurrenctPrice(asset) {
     return (todayCurrencyRate * asset.quantity).toFixed(2);
 }
 
+function logout() {
+    logoutCurrentUser();
+    alert("Pomyślnie wylogowano");
+    document.location.href = '/index.html';
+}
+
 async function getAssetCompareString(asset) {
     const todayPrice = await getTodayCurrenctPrice(asset);
     const buyPrice = asset.value;
+
+    console.log(todayPrice, buyPrice)
 
     let percent = todayPrice >= buyPrice ? '' : '-';
     percent += ((todayPrice / buyPrice) * 100).toFixed(3) + '%';

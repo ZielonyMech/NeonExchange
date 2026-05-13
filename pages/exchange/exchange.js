@@ -126,7 +126,8 @@ async function displayChartPopup(baseCurrency, selectedCurrency) {
         endDate: endDateInput.value
     };
 
-    if (getLoggedUser()) {
+    const loggedUser = getLoggedUser();
+    if (loggedUser && baseCurrency.toUpperCase() === loggedUser.userCurrency.toUpperCase()) {
         document.querySelector('.buyButton').disabled = false;
     }
     else {
@@ -221,7 +222,7 @@ function buyAsset(event) {
     console.log(event);
     const amountInput = document.querySelector('.chartCurrencyAmount');
     const amount = Number(amountInput.value);
-    
+
     if (isNaN(amount) || amount <= 0) {
         alert("Podaj poprawną ilość do kupienia!");
         return;
@@ -233,8 +234,9 @@ function buyAsset(event) {
         return;
     }
 
-    const buyValue = (amount * currencyRate).toFixed(2);
-    if(buyValue > loggedUser.balance) {
+    const totalCost = Number((amount * currencyRate).toFixed(2));
+
+    if (amount > loggedUser.balance) {
         alert("Brak wystarczających środków do zakupu waluty!");
         return;
     }
@@ -242,16 +244,14 @@ function buyAsset(event) {
     const boughtAsset = {
         name: currentSelectedCurrency.toUpperCase(),
         quantity: amount,
-        value: (amount * currencyRate).toFixed(2),
+        value: totalCost,
         buyDate: new Date().toISOString()
     }
 
     loggedUser.ownedAssets.push(boughtAsset);
-    loggedUser.balance -= boughtAsset.value;
-
+    loggedUser.balance -= amount;
     syncLoggedUser(loggedUser);
-
-    alert(`Kupiłeś ${amount} ${currentSelectedCurrency.toUpperCase()} za ${boughtAsset.value} PLN!`);
+    alert(`Kupiłeś ${totalCost} KRW!`);
 }
 
 document.querySelector('.buyButton').addEventListener('click', buyAsset);   

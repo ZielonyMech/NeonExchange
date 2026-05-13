@@ -1,40 +1,27 @@
-import { hashSomething, checkUserExists } from "/scripts/utils/auth.js"
+import { registerUser } from "/scripts/utils/auth.js"
+import { config } from "/scripts/config/config.js"
 const crypto = window.crypto
 
 async function register(event) {
     event.preventDefault();
 
-    const email = document.getElementById('email');
-    const password = document.getElementById('password');
-    const confirmPassword = document.getElementById('confirmPassword');
+    const email = document.querySelector('#email');
+    const password = document.querySelector('#password');
+    const currency = document.querySelector('#currencySelect');
+    const confirmPassword = document.querySelector('#confirmPassword');
 
     if (password.value !== confirmPassword.value) {
         alert('Hasła nie są identyczne!');
         return;
     }
-
-    const hashedPassword = await hashSomething(password.value, 'SHA-512');
     
-    const newUser = {
-        email: email.value,
-        password: hashedPassword,
-        balance: 1000,
-        ownedAssets: []
-    }
-
-    if (checkUserExists(email.value)) {
+    if(!(await registerUser(email.value, password.value, currency.value))) {
+        alert('Cos poszlo nie tak...');
         return;
     }
-
-    registerUser(newUser);
+    
     alert('Rejestracja zakończona sukcesem! Możesz teraz się zalogować.');
     document.location.href = '/pages/auth/login/login.html';
-}
-
-function registerUser(user) {
-    const savedUsers = JSON.parse(localStorage.getItem('users')) || [];
-    savedUsers.push(user);
-    localStorage.setItem('users', JSON.stringify(savedUsers));
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -42,4 +29,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (form) {
         form.addEventListener('submit', register);
     }
+
+    const currencySelect = document.querySelector('#currencySelect');
+
+    for (const currency of config.supportedCurrencies) {
+        const normalizedCurrency = currency.toUpperCase();
+        
+        const isDefault = normalizedCurrency === 'PLN';
+        const option = new Option(normalizedCurrency, normalizedCurrency, isDefault, isDefault);
+
+        currencySelect.add(option);
+    }
 });
+
+function createOption(currencyCode) {
+
+}
