@@ -216,26 +216,28 @@ dialog::backdrop {
     background: rgba(0, 0, 0, 0.8);
 }
 
+/* Główny kontener - teraz zarządza dwoma kolumnami */
 .chartBody {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: clamp(60vw, 80vw, 90vw);
-    height: clamp(50vh, 70vh, 85vh);
+    flex-direction: row; /* Elementy obok siebie */
+    gap: 30px;
+    width: clamp(60vw, 85vw, 95vw); /* Lekko poszerzone, by zmieścić panel */
+    height: clamp(50vh, 75vh, 90vh);
     border-radius: 16px;
     padding: 30px;
     background: #151515;
     border: 1px solid rgba(10, 201, 215, 0.3);
     box-shadow: 0 10px 40px rgba(10, 201, 215, 0.2);
+    box-sizing: border-box;
 }
 
-.chartSection {
-    width: 100%;
-    height: 100%;
+/* LEWA STRONA: Wykres i Tytuł */
+.chartArea {
+    flex: 1; /* Zajmuje całą dostępną przestrzeń po lewej */
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    align-items: center;
+    gap: 15px;
+    height: 100%;
 }
 
 .chartTitle {
@@ -245,90 +247,169 @@ dialog::backdrop {
     text-align: center;
 }
 
-.dateRangeForm {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
+/* Bezpieczny kontener na wykres, żeby dół nie był ucinany */
+.chartWrapper {
+    flex: 1;
     width: 100%;
-}
-
-.dateRangeForm input,
-.dateRangeForm label {
-    display: block;
-}
-
-.dateRangeForm input {
-    padding: 8px 12px;
-    border: 1px solid rgba(10, 201, 215, 0.3);
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
-    cursor: pointer;
-}
-
-.dateRangeForm input:focus {
-    outline: none;
-    border-color: #0ac9d7;
-    box-shadow: 0 0 8px rgba(10, 201, 215, 0.2);
-}
-
-.dateRangeForm label {
-    font-size: 0.85rem;
-    color: #e0e0e0;
-    text-align: center;
+    position: relative;
+    min-height: 0; /* Kluczowe dla poprawnego skalowania canvas w flexboxie */
 }
 
 .currencyChart {
-    flex: 1;
-    max-width: 100%;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* PRAWA STRONA: Panel sterowania */
+.controlPanel {
+    width: 280px; /* Stała szerokość panelu bocznego */
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    padding-left: 20px;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+/* Sekcja dat oraz pojedyncze grupy input + label */
+.dateRangeForm {
+    display: flex;
+    gap: 12px;
     width: 100%;
 }
 
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+
+.calculatorForm {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+/* Stylowanie etykiet tekstowych */
+label, .infoLabel, .resultLabel {
+    font-size: 0.85rem;
+    color: #e0e0e0;
+}
+
+.infoSubLabel {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 2px;
+}
+
+.infoSection p {
+    margin: 0;
+}
+
+/* Wspólne style dla inputów (Date i Number) */
+.dateRangeForm input,
 .chartCurrencyAmount {
+    width: 100%;
     padding: 10px 12px;
     border: 1px solid rgba(10, 201, 215, 0.3);
     border-radius: 6px;
     background: rgba(255, 255, 255, 0.08);
     color: #fff;
-    max-width: 250px;
-    width: 100%;
-    font-size: 16px;
+    font-size: 14px;
     box-sizing: border-box;
-    text-align: center;
+    outline: none;
+    transition: all 0.2s ease;
 }
 
+.dateRangeForm input:focus,
 .chartCurrencyAmount:focus {
-    outline: none;
     border-color: #0ac9d7;
     background: rgba(255, 255, 255, 0.1);
     box-shadow: 0 0 8px rgba(10, 201, 215, 0.2);
 }
 
 .chartCurrencyAmount::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* Sekcja wyniku na dole */
+.resultSection {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .chartCurrencyValue {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     color: #0ac9d7;
     font-weight: 700;
-    text-align: center;
     min-height: 30px;
     display: flex;
     align-items: center;
-    justify-content: center;
 }
 
-.chartBody button:hover {
-    background: #08a8b8;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(10, 201, 215, 0.3);
+/* STYLOWANIE PRZYCISKÓW */
+.btnPrzelicz, .btnClose {
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    width: 100%;
+    text-align: center;
 }
 
-.chartBody button:hover {
+/* Przycisk Przelicz */
+.btnPrzelicz {
+    background: rgba(10, 201, 215, 0.1);
+    border: 1px solid rgba(10, 201, 215, 0.4);
+    color: #0ac9d7;
+}
+
+.btnPrzelicz:hover {
     background: #08a8b8;
-    transform: translateY(-2px);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(10, 201, 215, 0.2);
+}
+
+/* Przycisk Close (wepchnięty na sam dół panelu przez margin-top: auto) */
+.btnClose {
+    margin-top: auto;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.btnClose:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+/* Responsywność: na bardzo małych ekranach układa panel pod wykresem */
+@media (max-width: 768px) {
+    .chartBody {
+        flex-direction: column;
+        height: auto;
+        overflow-y: auto;
+    }
+    .controlPanel {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        padding-left: 0;
+        padding-top: 20px;
+    }
+    .btnClose {
+        margin-top: 15px;
+    }
 }
 
 /* Footer */
