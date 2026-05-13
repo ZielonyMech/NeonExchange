@@ -105,9 +105,6 @@ async function displayChartPopup(baseCurrency, selectedCurrency) {
     const dialog = document.querySelector('#chartDialog');
     dialog.showModal();
 
-    const title = dialog.querySelector('.chartTitle');
-    title.textContent = `Kurs 1 ${baseCurrency.toUpperCase()} -> ${selectedCurrency.toUpperCase()}`;
-
     currentBaseCurrency = baseCurrency;
     currentSelectedCurrency = selectedCurrency;
 
