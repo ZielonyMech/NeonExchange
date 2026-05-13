@@ -28,6 +28,7 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center;
+    box-sizing: border-box;
 }
 
 h1 {
@@ -99,6 +100,7 @@ h1 {
     transition: all 0.3s ease;
     font-weight: 600;
     text-align: center;
+    box-sizing: border-box;
 }
 
 .currencyCard:hover {
@@ -147,6 +149,7 @@ h1 {
     gap: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
+    box-sizing: border-box;
 }
 
 .rateCard:hover {
@@ -197,12 +200,8 @@ h1 {
 }
 
 @keyframes rotation {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 /* Chart Dialog */
@@ -218,24 +217,26 @@ dialog::backdrop {
 
 .chartBody {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: clamp(60vw, 80vw, 90vw);
-    height: clamp(50vh, 70vh, 85vh);
+    flex-direction: row; 
+    gap: 30px;
+    overflow: hidden;
+    width: clamp(60vw, 85vw, 95vw); 
+    height: clamp(50vh, 75vh, 90vh);
     border-radius: 16px;
     padding: 30px;
     background: #151515;
     border: 1px solid rgba(10, 201, 215, 0.3);
     box-shadow: 0 10px 40px rgba(10, 201, 215, 0.2);
+    box-sizing: border-box;
 }
 
-.chartSection {
-    width: 100%;
-    height: 100%;
+/* LEWA STRONA: Wykres i Tytuł */
+.chartArea {
+    flex: 1; 
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    align-items: center;
+    gap: 15px;
+    height: 100%;
 }
 
 .chartTitle {
@@ -245,90 +246,155 @@ dialog::backdrop {
     text-align: center;
 }
 
+.chartWrapper, .canvasContainer {
+    flex: 1;
+    width: 100%;
+    min-height: 0; 
+}
+
+/* PRAWA STRONA: Panel sterowania */
+.controlPanel {
+    width: 300px; 
+    min-width: 290px; 
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    padding-left: 20px;
+    height: 100%;
+    box-sizing: border-box;
+}
+
 .dateRangeForm {
     display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
+    gap: 12px;
     width: 100%;
+    box-sizing: border-box;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 0; 
+}
+
+.calculatorForm {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+label, .infoLabel, .resultLabel, .inputGroup span, .inputGroup p {
+    font-size: 0.85rem;
+    color: #e0e0e0 !important;
+}
+
+.inputGroup {
+    color: #e0e0e0 !important;
+}
+
+.infoSubLabel {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 2px;
+}
+
+.infoSection p {
+    margin: 0;
 }
 
 .dateRangeForm input,
-.dateRangeForm label {
-    display: block;
-}
-
-.dateRangeForm input {
-    padding: 8px 12px;
-    border: 1px solid rgba(10, 201, 215, 0.3);
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
-    cursor: pointer;
-}
-
-.dateRangeForm input:focus {
-    outline: none;
-    border-color: #0ac9d7;
-    box-shadow: 0 0 8px rgba(10, 201, 215, 0.2);
-}
-
-.dateRangeForm label {
-    font-size: 0.85rem;
-    color: #e0e0e0;
-    text-align: center;
-}
-
-.currencyChart {
-    flex: 1;
-    max-width: 100%;
-    width: 100%;
-}
-
 .chartCurrencyAmount {
-    padding: 10px 12px;
+    width: 100%;
+    padding: 10px 8px; 
     border: 1px solid rgba(10, 201, 215, 0.3);
     border-radius: 6px;
     background: rgba(255, 255, 255, 0.08);
     color: #fff;
-    max-width: 250px;
-    width: 100%;
-    font-size: 16px;
+    font-size: 13px; 
     box-sizing: border-box;
-    text-align: center;
+    outline: none;
+    transition: all 0.2s ease;
+    overflow: hidden; 
 }
 
+.dateRangeForm input[type="date"]::-webkit-calendar-picker-indicator {
+    margin-left: 4px;
+    padding: 0;
+    cursor: pointer;
+    transform: scale(0.9); 
+}
+
+.dateRangeForm input[type="date"]::-webkit-datetime-edit {
+    padding: 0;
+}
+
+.dateRangeForm input:focus,
 .chartCurrencyAmount:focus {
-    outline: none;
     border-color: #0ac9d7;
     background: rgba(255, 255, 255, 0.1);
     box-shadow: 0 0 8px rgba(10, 201, 215, 0.2);
 }
 
 .chartCurrencyAmount::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.resultSection {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .chartCurrencyValue {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     color: #0ac9d7;
     font-weight: 700;
-    text-align: center;
     min-height: 30px;
     display: flex;
     align-items: center;
-    justify-content: center;
 }
 
-.chartBody button:hover {
-    background: #08a8b8;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(10, 201, 215, 0.3);
+.btnPrzelicz, .btnClose {
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    width: 100%;
+    text-align: center;
 }
 
-.chartBody button:hover {
+.btnPrzelicz {
+    background: rgba(10, 201, 215, 0.1);
+    border: 1px solid rgba(10, 201, 215, 0.4);
+    color: #0ac9d7;
+}
+
+.btnPrzelicz:hover {
     background: #08a8b8;
-    transform: translateY(-2px);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(10, 201, 215, 0.2);
+}
+
+.btnClose {
+    margin-top: auto;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.btnClose:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: #fff;
+    transform: translateY(-1px);
 }
 
 /* Footer */
@@ -361,10 +427,38 @@ footer {
     text-decoration: underline;
 }
 
-/* Responsywność */
+/* Media Query: Telefony i Tablety pionowo (Max 768px) */
+@media (max-width: 768px) {
+    .chartBody {
+        flex-direction: column;
+        height: auto;
+        overflow-y: auto;
+    }
+    .controlPanel {
+        width: 100%;
+        min-width: 0;
+        border-left: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        padding-left: 0;
+        padding-top: 20px;
+    }
+    .btnClose {
+        margin-top: 15px;
+    }
+}
+
+/* NAPRAWIONE: Media Query dla małych ekranów smartfonów (Max 480px) */
 @media (max-width: 480px) {
     body {
-        grid-template-columns: 1fr;
+        /* Przełączenie układu grid na flex eliminuje błąd ucinania/przepychania kontenera main do prawej strony */
+        display: flex;
+        flex-direction: column;
+        min-width: 100%;
+    }
+
+    app-header, main, footer {
+        grid-column: auto;
+        width: 100%;
     }
 
     main {
@@ -372,36 +466,44 @@ footer {
     }
 
     h1 {
-        font-size: 1.3rem;
+        font-size: 1.4rem;
         margin-bottom: 20px;
+        text-align: center;
     }
 
     .currencySearchWrapper label {
         font-size: 1rem;
     }
 
+    /* Dopasowanie szerokości kafelków wyboru walut */
     .currencyCard {
-        width: clamp(100px, 18%, 150px);
-        padding: 8px 10px;
-        font-size: 0.8rem;
+        width: calc(50% - 0.5rem);
+        padding: 10px 8px;
+        font-size: 0.85rem;
+    }
+
+    /* Kafelki z pojedynczymi kursami wyświetlają się stabilnie na całą szerokość ekranu */
+    .ratesGrid {
+        grid-template-columns: 1fr;
     }
 
     .rateCard {
-        padding: 12px;
+        padding: 14px;
         gap: 8px;
     }
 
     .rateCode {
-        font-size: 0.9rem;
+        font-size: 1rem;
     }
 
     .rateValue {
-        font-size: 1.1rem;
+        font-size: 1.2rem;
     }
 
     .chartBody {
-        width: 90vw;
-        height: 70vh;
+        width: 92vw;
+        height: auto;
+        max-height: 85vh;
         padding: 20px;
     }
 
@@ -410,6 +512,7 @@ footer {
     }
 }
 
+/* Media Query: Ekrany średnie (Min 768px) */
 @media (min-width: 768px) {
     h1 {
         font-size: 2.5rem;
@@ -434,6 +537,7 @@ footer {
     }
 }
 
+/* Media Query: Monitor desktopowy (Min 1024px) */
 @media (min-width: 1024px) {
     h1 {
         font-size: 2.8rem;
@@ -442,4 +546,4 @@ footer {
     .ratesGrid {
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     }
-} 
+}
