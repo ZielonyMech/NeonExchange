@@ -23,53 +23,53 @@
 
         <div class="exchangeRates"></div>
 
-       <dialog id="chartDialog">
-    <div class="chartBody">
-        
-        <div class="chartArea">
-            <h2 class="chartTitle">Kurs 1 BRL -> CHF</h2>
-            <span class="loader" hidden></span>
-            
-            <div class="canvasContainer">
-                <canvas class="currencyChart"></canvas>
-            </div>
-        </div>
-
-        <div class="controlPanel">
-            
-            <div class="dateRangeForm">
-                <div class="inputGroup">
-                    <label自动 for="startDate">Data początkowa</label>
-                    <input type="date" id="startDate" class="startDate">
-                </div>
-                <div class="inputGroup">
-                    <label for="endDate">Data końcowa</label>
-                    <input type="date" id="endDate" class="endDate">
-                </div>
-            </div>
-
-            <div class="infoSection">
-                <p class="infoLabel">Wybrano kurs z dnia</p>
-                <p class="infoSubLabel">Kurs</p>
-            </div>
-
-            <div class="calculatorForm">
-                <label for="chartCurrencyAmount">Wartość do przeliczenia</label>
-                <input type="number" id="chartCurrencyAmount" class="chartCurrencyAmount" placeholder="Value">
+        <dialog id="chartDialog">
+            <div class="chartBody">
                 
-                <button type="button" class="btnPrzelicz">Przelicz</button>
+                <div class="chartArea">
+                    <h2 class="chartTitle">Kurs 1 BRL -> CHF</h2>
+                    <span class="loader" hidden></span>
+                    
+                    <div class="canvasContainer">
+                        <canvas class="currencyChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="controlPanel">
+                    
+                    <div class="dateRangeForm">
+                        <div class="inputGroup">
+                            <label for="startDate">Data początkowa</label>
+                            <input type="date" id="startDate" class="startDate">
+                        </div>
+                        <div class="inputGroup">
+                            <label for="endDate">Data końcowa</label>
+                            <input type="date" id="endDate" class="endDate">
+                        </div>
+                    </div>
+
+                    <div class="infoSection">
+                        <p class="infoLabel">Wybrano kurs z dnia</p>
+                        <p class="infoSubLabel">Kurs</p>
+                    </div>
+
+                    <div class="calculatorForm">
+                        <label for="chartCurrencyAmount">Wartość do przeliczenia</label>
+                        <input type="number" id="chartCurrencyAmount" class="chartCurrencyAmount" placeholder="Value">
+                        
+                        <button type="button" class="btnPrzelicz">Przelicz</button>
+                    </div>
+
+                    <div class="resultSection">
+                        <span class="resultLabel">Wartość waluty</span>
+                        <span class="chartCurrencyValue">0.1587 CHF</span>
+                    </div>
+
+                    <button commandfor="chartDialog" command="close" class="btnClose">Close</button>
+                </div>
+
             </div>
-
-            <div class="resultSection">
-                <span class="resultLabel">Wartość waluty</span>
-                <span class="chartCurrencyValue">0.1587 CHF</span>
-            </div>
-
-            <button commandfor="chartDialog" command="close" class="btnClose">Close</button>
-        </div>
-
-    </div>
-</dialog>
+        </dialog>
     </main>
 
     <footer class="footer">

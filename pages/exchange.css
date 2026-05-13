@@ -28,6 +28,7 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center;
+    box-sizing: border-box;
 }
 
 h1 {
@@ -99,6 +100,7 @@ h1 {
     transition: all 0.3s ease;
     font-weight: 600;
     text-align: center;
+    box-sizing: border-box;
 }
 
 .currencyCard:hover {
@@ -147,6 +149,7 @@ h1 {
     gap: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
+    box-sizing: border-box;
 }
 
 .rateCard:hover {
@@ -197,12 +200,8 @@ h1 {
 }
 
 @keyframes rotation {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 /* Chart Dialog */
@@ -216,12 +215,12 @@ dialog::backdrop {
     background: rgba(0, 0, 0, 0.8);
 }
 
-/* Główny kontener - teraz zarządza dwoma kolumnami */
 .chartBody {
     display: flex;
-    flex-direction: row; /* Elementy obok siebie */
+    flex-direction: row; 
     gap: 30px;
-    width: clamp(60vw, 85vw, 95vw); /* Lekko poszerzone, by zmieścić panel */
+    overflow: hidden;
+    width: clamp(60vw, 85vw, 95vw); 
     height: clamp(50vh, 75vh, 90vh);
     border-radius: 16px;
     padding: 30px;
@@ -233,7 +232,7 @@ dialog::backdrop {
 
 /* LEWA STRONA: Wykres i Tytuł */
 .chartArea {
-    flex: 1; /* Zajmuje całą dostępną przestrzeń po lewej */
+    flex: 1; 
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -247,12 +246,11 @@ dialog::backdrop {
     text-align: center;
 }
 
-/* Bezpieczny kontener na wykres, żeby dół nie był ucinany */
-.chartWrapper {
+.chartWrapper, .canvasContainer {
     flex: 1;
     width: 100%;
     position: relative;
-    min-height: 0; /* Kluczowe dla poprawnego skalowania canvas w flexboxie */
+    min-height: 0; 
 }
 
 .currencyChart {
@@ -262,7 +260,8 @@ dialog::backdrop {
 
 /* PRAWA STRONA: Panel sterowania */
 .controlPanel {
-    width: 280px; /* Stała szerokość panelu bocznego */
+    width: 300px; 
+    min-width: 290px; 
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -272,11 +271,11 @@ dialog::backdrop {
     box-sizing: border-box;
 }
 
-/* Sekcja dat oraz pojedyncze grupy input + label */
 .dateRangeForm {
     display: flex;
     gap: 12px;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .inputGroup {
@@ -284,6 +283,7 @@ dialog::backdrop {
     flex-direction: column;
     gap: 6px;
     flex: 1;
+    min-width: 0; 
 }
 
 .calculatorForm {
@@ -293,10 +293,13 @@ dialog::backdrop {
     width: 100%;
 }
 
-/* Stylowanie etykiet tekstowych */
-label, .infoLabel, .resultLabel {
+label, .infoLabel, .resultLabel, .inputGroup span, .inputGroup p {
     font-size: 0.85rem;
-    color: #e0e0e0;
+    color: #e0e0e0 !important;
+}
+
+.inputGroup {
+    color: #e0e0e0 !important;
 }
 
 .infoSubLabel {
@@ -309,19 +312,30 @@ label, .infoLabel, .resultLabel {
     margin: 0;
 }
 
-/* Wspólne style dla inputów (Date i Number) */
 .dateRangeForm input,
 .chartCurrencyAmount {
     width: 100%;
-    padding: 10px 12px;
+    padding: 10px 8px; 
     border: 1px solid rgba(10, 201, 215, 0.3);
     border-radius: 6px;
     background: rgba(255, 255, 255, 0.08);
     color: #fff;
-    font-size: 14px;
+    font-size: 13px; 
     box-sizing: border-box;
     outline: none;
     transition: all 0.2s ease;
+    overflow: hidden; 
+}
+
+.dateRangeForm input[type="date"]::-webkit-calendar-picker-indicator {
+    margin-left: 4px;
+    padding: 0;
+    cursor: pointer;
+    transform: scale(0.9); 
+}
+
+.dateRangeForm input[type="date"]::-webkit-datetime-edit {
+    padding: 0;
 }
 
 .dateRangeForm input:focus,
@@ -335,7 +349,6 @@ label, .infoLabel, .resultLabel {
     color: rgba(255, 255, 255, 0.4);
 }
 
-/* Sekcja wyniku na dole */
 .resultSection {
     display: flex;
     flex-direction: column;
@@ -351,7 +364,6 @@ label, .infoLabel, .resultLabel {
     align-items: center;
 }
 
-/* STYLOWANIE PRZYCISKÓW */
 .btnPrzelicz, .btnClose {
     padding: 10px 12px;
     border-radius: 6px;
@@ -364,7 +376,6 @@ label, .infoLabel, .resultLabel {
     text-align: center;
 }
 
-/* Przycisk Przelicz */
 .btnPrzelicz {
     background: rgba(10, 201, 215, 0.1);
     border: 1px solid rgba(10, 201, 215, 0.4);
@@ -378,7 +389,6 @@ label, .infoLabel, .resultLabel {
     box-shadow: 0 4px 12px rgba(10, 201, 215, 0.2);
 }
 
-/* Przycisk Close (wepchnięty na sam dół panelu przez margin-top: auto) */
 .btnClose {
     margin-top: auto;
     background: transparent;
@@ -391,25 +401,6 @@ label, .infoLabel, .resultLabel {
     border-color: rgba(255, 255, 255, 0.4);
     color: #fff;
     transform: translateY(-1px);
-}
-
-/* Responsywność: na bardzo małych ekranach układa panel pod wykresem */
-@media (max-width: 768px) {
-    .chartBody {
-        flex-direction: column;
-        height: auto;
-        overflow-y: auto;
-    }
-    .controlPanel {
-        width: 100%;
-        border-left: none;
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
-        padding-left: 0;
-        padding-top: 20px;
-    }
-    .btnClose {
-        margin-top: 15px;
-    }
 }
 
 /* Footer */
@@ -442,10 +433,38 @@ footer {
     text-decoration: underline;
 }
 
-/* Responsywność */
+/* Media Query: Telefony i Tablety pionowo (Max 768px) */
+@media (max-width: 768px) {
+    .chartBody {
+        flex-direction: column;
+        height: auto;
+        overflow-y: auto;
+    }
+    .controlPanel {
+        width: 100%;
+        min-width: 0;
+        border-left: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        padding-left: 0;
+        padding-top: 20px;
+    }
+    .btnClose {
+        margin-top: 15px;
+    }
+}
+
+/* NAPRAWIONE: Media Query dla małych ekranów smartfonów (Max 480px) */
 @media (max-width: 480px) {
     body {
-        grid-template-columns: 1fr;
+        /* Przełączenie układu grid na flex eliminuje błąd ucinania/przepychania kontenera main do prawej strony */
+        display: flex;
+        flex-direction: column;
+        min-width: 100%;
+    }
+
+    app-header, main, footer {
+        grid-column: auto;
+        width: 100%;
     }
 
     main {
@@ -453,36 +472,44 @@ footer {
     }
 
     h1 {
-        font-size: 1.3rem;
+        font-size: 1.4rem;
         margin-bottom: 20px;
+        text-align: center;
     }
 
     .currencySearchWrapper label {
         font-size: 1rem;
     }
 
+    /* Dopasowanie szerokości kafelków wyboru walut */
     .currencyCard {
-        width: clamp(100px, 18%, 150px);
-        padding: 8px 10px;
-        font-size: 0.8rem;
+        width: calc(50% - 0.5rem);
+        padding: 10px 8px;
+        font-size: 0.85rem;
+    }
+
+    /* Kafelki z pojedynczymi kursami wyświetlają się stabilnie na całą szerokość ekranu */
+    .ratesGrid {
+        grid-template-columns: 1fr;
     }
 
     .rateCard {
-        padding: 12px;
+        padding: 14px;
         gap: 8px;
     }
 
     .rateCode {
-        font-size: 0.9rem;
+        font-size: 1rem;
     }
 
     .rateValue {
-        font-size: 1.1rem;
+        font-size: 1.2rem;
     }
 
     .chartBody {
-        width: 90vw;
-        height: 70vh;
+        width: 92vw;
+        height: auto;
+        max-height: 85vh;
         padding: 20px;
     }
 
@@ -491,6 +518,7 @@ footer {
     }
 }
 
+/* Media Query: Ekrany średnie (Min 768px) */
 @media (min-width: 768px) {
     h1 {
         font-size: 2.5rem;
@@ -515,6 +543,7 @@ footer {
     }
 }
 
+/* Media Query: Monitor desktopowy (Min 1024px) */
 @media (min-width: 1024px) {
     h1 {
         font-size: 2.8rem;
@@ -523,4 +552,4 @@ footer {
     .ratesGrid {
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     }
-} 
+}
