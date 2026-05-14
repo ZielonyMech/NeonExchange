@@ -1,7 +1,10 @@
 <template id="app-header-template">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Crete+Round:ital@0;1&family=Jost:ital,wght@0,100..900;1,100..900&family=Pacifico&display=swap');
+
         :host {
             display: block;
+            font-family: 'Crete Round', serif;
         }
 
         .header {
@@ -28,19 +31,19 @@
         .nav-menu {
             position: absolute;
             top: calc(100% + 8px);
-            right: 0;
+            right: 16px;
             left: auto;
-            width: 200px;
+            width: min(260px, calc(100vw - 32px));
             background: #151515;
-            border-radius: 6px;
-            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+            border-radius: 10px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
             display: flex;
             flex-direction: column;
-            padding: 8px;
+            padding: 10px;
             box-sizing: border-box;
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.2s ease-in-out, opacity 0.2s ease-in-out;
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
             opacity: 0;
             pointer-events: none;
             z-index: 20;
@@ -58,23 +61,27 @@
             padding: 0;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
 
         .nav-menu a {
-            color: white;
+            color: #f5f7ff;
             text-decoration: none;
-            font-weight: 600;
+            font-family: inherit;
+            font-weight: 800;
             font-size: 1rem;
-            padding: 10px 12px;
-            border-radius: 4px;
+            padding: 14px 16px;
+            border-radius: 6px;
             display: block;
             text-align: center;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease-in-out;
+            letter-spacing: 0.04em;
+            line-height: 1.4;
+            text-shadow: 0 0 4px rgba(255, 255, 255, 0.12);
         }
 
-       .nav-menu a:hover {
-            background: rgba(10, 201, 215, 0.2);
+        .nav-menu a:hover {
+            background: rgba(10, 201, 215, 0.15);
             color: #0ac9d7;
         }
 
@@ -100,10 +107,10 @@
         }
 
         .brand {
-            font-size: 1.1rem;
-            font-weight: 700;
+            font-size: 1.25rem;
+            font-weight: 900;
             color: #0ac9d7;
-            text-shadow: 0 0 10px rgba(10, 201, 215, 0.3);
+            text-shadow: 0 0 16px rgba(10, 201, 215, 0.55);
         }
     </style>
 
@@ -119,7 +126,7 @@
                 <slot name="nav">
                     <ul>
                         <li><a href="/index.html">Strona główna</a></li>
-                        <li><a href="/pages/exchange.html">Usługi</a></li>
+                        <li><a href="/pages/exchange/exchange.html">Usługi</a></li>
                         <li><a href="#contact">Kontakt</a></li>
                         <li><a id="loginLink" href="/pages/auth/login/login.html">Logowanie</a></li>
                     </ul>
