@@ -435,37 +435,34 @@ label, .infoLabel, .resultLabel, .inputGroup span, .inputGroup p {
     transform: translateY(-1px);
 }
 
-/* Footer */
 footer {
-    grid-column: 1 / -1;
     background: #000;
     color: #dfdfdf;
-    border-top: 1px solid rgba(10, 201, 215, 0.2);
 }
 
-.footer-inner {
+footer .footer-inner {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 15px 20px;
     text-align: center;
 }
 
-.footer p {
-    margin: 6px 0;
+footer p {
+    margin: 4px 0;
     font-size: 0.8rem;
 }
 
-.footer a {
-    color: #0ac9d7;
+footer a {
+    color: #ffffff;
     text-decoration: none;
     font-weight: 600;
 }
 
-.footer a:hover {
+footer a:hover {
     text-decoration: underline;
 }
 
-/* Media Query: Telefony i Tablety pionowo (Max 768px) */
+/* Ekrany małe */
 @media (max-width: 768px) {
     .chartBody {
         flex-direction: column;
@@ -485,10 +482,8 @@ footer {
     }
 }
 
-/* NAPRAWIONE: Media Query dla małych ekranów smartfonów (Max 480px) */
 @media (max-width: 480px) {
     body {
-        /* Przełączenie układu grid na flex eliminuje błąd ucinania/przepychania kontenera main do prawej strony */
         display: flex;
         flex-direction: column;
         min-width: 100%;
@@ -513,14 +508,12 @@ footer {
         font-size: 1rem;
     }
 
-    /* Dopasowanie szerokości kafelków wyboru walut */
     .currencyCard {
         width: calc(50% - 0.5rem);
         padding: 10px 8px;
         font-size: 0.85rem;
     }
 
-    /* Kafelki z pojedynczymi kursami wyświetlają się stabilnie na całą szerokość ekranu */
     .ratesGrid {
         grid-template-columns: 1fr;
     }
@@ -550,7 +543,7 @@ footer {
     }
 }
 
-/* Media Query: Ekrany średnie (Min 768px) */
+/* Ekrany średnie */
 @media (min-width: 768px) {
     h1 {
         font-size: 2.5rem;
@@ -575,7 +568,7 @@ footer {
     }
 }
 
-/* Media Query: Monitor desktopowy (Min 1024px) */
+/* Ekrany duże */
 @media (min-width: 1024px) {
     h1 {
         font-size: 2.8rem;

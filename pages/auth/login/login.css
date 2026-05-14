@@ -119,32 +119,30 @@ main {
     text-shadow: 0 0 8px rgba(10, 201, 215, 0.3);
 }
 
-/* Footer */
 footer {
     background: #000;
     color: #dfdfdf;
-    border-top: 1px solid rgba(10, 201, 215, 0.2);
 }
 
-.footer-inner {
+footer .footer-inner {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 15px 20px;
     text-align: center;
 }
 
-.footer p {
-    margin: 6px 0;
+footer p {
+    margin: 4px 0;
     font-size: 0.8rem;
 }
 
-.footer a {
-    color: #0ac9d7;
+footer a {
+    color: #ffffff;
     text-decoration: none;
     font-weight: 600;
 }
 
-.footer a:hover {
+footer a:hover {
     text-decoration: underline;
 }
 
