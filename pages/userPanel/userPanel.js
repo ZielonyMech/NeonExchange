@@ -70,7 +70,7 @@ async function sellAsset(asset) {
         return;
     }
 
-    loggedUser.balance += Number(todayPrice.toFixed(2));
+    loggedUser.balance += Number(todayPrice);
 
     const soldAssetIndex = loggedUser.ownedAssets.findIndex(elem => 
         elem.name == asset.name &&
