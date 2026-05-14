@@ -462,7 +462,7 @@ footer a:hover {
     text-decoration: underline;
 }
 
-/* Media Query: Telefony i Tablety pionowo (Max 768px) */
+/* Ekrany małe */
 @media (max-width: 768px) {
     .chartBody {
         flex-direction: column;
@@ -482,7 +482,6 @@ footer a:hover {
     }
 }
 
-/* NAPRAWIONE: Media Query dla małych ekranów smartfonów (Max 480px) */
 @media (max-width: 480px) {
     body {
         display: flex;
@@ -509,14 +508,12 @@ footer a:hover {
         font-size: 1rem;
     }
 
-    /* Dopasowanie szerokości kafelków wyboru walut */
     .currencyCard {
         width: calc(50% - 0.5rem);
         padding: 10px 8px;
         font-size: 0.85rem;
     }
 
-    /* Kafelki z pojedynczymi kursami wyświetlają się stabilnie na całą szerokość ekranu */
     .ratesGrid {
         grid-template-columns: 1fr;
     }
@@ -546,7 +543,7 @@ footer a:hover {
     }
 }
 
-/* Media Query: Ekrany średnie (Min 768px) */
+/* Ekrany średnie */
 @media (min-width: 768px) {
     h1 {
         font-size: 2.5rem;
@@ -571,7 +568,7 @@ footer a:hover {
     }
 }
 
-/* Media Query: Monitor desktopowy (Min 1024px) */
+/* Ekrany duże */
 @media (min-width: 1024px) {
     h1 {
         font-size: 2.8rem;
