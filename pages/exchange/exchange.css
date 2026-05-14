@@ -180,22 +180,18 @@ h1 {
 
 /* Loader */
 .loader {
-    width: 48px;
-    height: 48px;
-    border: 5px solid rgba(10, 201, 215, 0.3);
+    width: 42px;
+    height: 42px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
     border-top-color: #0ac9d7;
     border-radius: 50%;
     box-sizing: border-box;
-    display: inline-block;
-    animation: rotation 1s linear infinite;
-    margin: 20px auto;
+    animation: rotation 0.8s linear infinite;
 }
 
+.loaderContainer[hidden],
+.loading[hidden],
 .loader[hidden] {
-    display: none !important;
-}
-
-.loading[hidden] {
     display: none !important;
 }
 
@@ -209,15 +205,28 @@ dialog {
     background: transparent;
     border: none;
     padding: 0;
+    position: relative;
 }
 
 dialog::backdrop {
     background: rgba(0, 0, 0, 0.8);
 }
 
+.loaderContainer {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    z-index: 10;
+    border-radius: 16px;
+    background: rgba(21, 21, 21, 0.68);
+    pointer-events: none;
+}
+
 .chartBody {
     display: flex;
     flex-direction: row; 
+    align-items: stretch;
     gap: 30px;
     overflow: hidden;
     width: clamp(60vw, 85vw, 95vw); 
@@ -235,8 +244,15 @@ dialog::backdrop {
     flex: 1; 
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 15px;
     height: 100%;
+    min-height: 0;
+}
+
+.currencyChart {
+    width: 100% !important;
+    max-height: 100%;
 }
 
 .chartTitle {
@@ -358,7 +374,7 @@ label, .infoLabel, .resultLabel, .inputGroup span, .inputGroup p {
     align-items: center;
 }
 
-.btnPrzelicz, .btnClose {
+.btnPrzelicz, .btnKup, .btnClose {
     padding: 10px 12px;
     border-radius: 6px;
     font-size: 14px;
@@ -381,6 +397,28 @@ label, .infoLabel, .resultLabel, .inputGroup span, .inputGroup p {
     color: #fff;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(10, 201, 215, 0.2);
+}
+
+.btnKup {
+    background: #0ac9d7;
+    border: 1px solid #0ac9d7;
+    color: #051214;
+}
+
+.btnKup:hover:not(:disabled) {
+    background: #ffffff;
+    border-color: #ffffff;
+    color: #051214;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(10, 201, 215, 0.3);
+}
+
+.btnKup:disabled {
+    cursor: not-allowed;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.35);
+    box-shadow: none;
 }
 
 .btnClose {

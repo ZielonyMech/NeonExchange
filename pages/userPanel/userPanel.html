@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/scripts/bootstrap.js" type="module"></script>
+    <script src="./userPanel.js" type="module" defer></script>
+    <link href="./userPanel.css" rel="stylesheet">
+    <title>Panel użytkownika</title>
+</head>
+<body>
+    <app-header class="header"></app-header>
+    
+    <main>
+        <h1>Witaj na swoim panelu!</h1>
+        
+        <div class="userDetails">
+            <span id="username"></span>
+            <span id="balance"></span>
+            <span id="userCurrency"></span>
+            <button id="logout">Wyloguj się</button>
+        </div>
+
+        <section class="assetContainer">
+            <h2>Twoje aktywa</h2>
+            <div class="assetsList"></div>
+        </section>
+    </main>
+</body>
+</html>
+
+<template id="assetCard">
+    <div class="assetCard">
+        <span class="assetName">Nazwa waluty <slot name="name"></slot></span>
+        <span class="assetQuantity">Ilość <slot name="quantity"></slot></span>
+        <span class="assetBuyDate"><slot name="buyDate"></slot></span>
+        <span class="assetCurrentValue"><slot name="currentValue"></slot></span>
+        <span class="assetBuyPrice">Wartość w dniu zakupu <slot name="buyPrice"></slot></span>
+        <div class="compareSlot">
+            <span class="assetComparePercent"><slot name="assetComparePercent"></slot></span>
+            <span class="assetCompareDifference"><slot name="assetCompareDifference"></slot></span>
+        </div>
+        <button class="sellButton">Sprzedaj pozycję</button>
+    </div>
+</template>

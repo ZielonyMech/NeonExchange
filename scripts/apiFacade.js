@@ -100,7 +100,7 @@ function praseCurrencyRate(data) {
  * @param {Function} [filterFn=filterCurrenciesWhitelist] - Optional filter function for the rates.
  * @returns {Promise<Object>} A promise resolving to an object with date, baseCurrency, and ratesArr.
  */
-export async function APIgetCurrencyRates(currencyCode, isoDate = null, filterFn = filterCurrenciesWhitelist) {
+export async function APIgetCurrencyRates(currencyCode, isoDate = Date.now(), filterFn = filterCurrenciesWhitelist) {
     try {
         const response = await fetch(buildCurrencyRatesUrl(currencyCode, isoDate));
 

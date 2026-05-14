@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kursy walut</title>
     <link href="./exchange.css" rel="stylesheet"> 
+    <script src=" ./currencyChart.js" type="module"></script>
     <script src="./exchange.js" type="module"></script>
-    <script src="../scripts/bootstrap.js" type="module"></script>
+    <script src="/scripts/bootstrap.js" type="module"></script>
 </head>
 <body>
     <app-header></app-header>
@@ -24,13 +25,13 @@
         <div class="exchangeRates"></div>
 
         <dialog id="chartDialog">
+            <div class="loaderContainer" hidden>
+                <div class="loader"></div>
+            </div>
+            
             <div class="chartBody">
                 <div class="chartArea">
-                    <span class="loader" hidden></span>
-                    
-                    <div class="canvasContainer">
-                        <canvas class="currencyChart"></canvas>
-                    </div>
+                    <canvas class="currencyChart"></canvas>
                 </div>
 
                 <div class="controlPanel">
@@ -47,23 +48,24 @@
                     </div>
 
                     <div class="infoSection">
-                        <p class="infoLabel">Wybrano kurs z dnia</p>
-                        <p class="infoSubLabel">Kurs</p>
+                        <p class="infoLabel">Wartośc wybranego kursu</p>
+                        <p class="infoSubLabel"></p>
                     </div>
 
                     <div class="calculatorForm">
-                        <label for="chartCurrencyAmount">Wartość do przeliczenia</label>
+                        <label for="chartCurrencyAmount">Wartość do przeliczenia <span class="chartCurrencyCode"></span></label>
                         <input type="number" id="chartCurrencyAmount" class="chartCurrencyAmount" placeholder="Value">
                         
-                        <button type="button" class="btnPrzelicz">Przelicz</button>
+                        <button class="btnPrzelicz">Przelicz</button>
+                        <button class="btnKup" disabled>Kup</button>
                     </div>
 
                     <div class="resultSection">
                         <span class="resultLabel">Wartość waluty</span>
-                        <span class="chartCurrencyValue">0.1587 CHF</span>
+                        <span class="chartCurrencyValue"></span>
                     </div>
 
-                    <button commandfor="chartDialog" command="close" class="btnClose">Close</button>
+                    <button commandfor="chartDialog" command="close" class="btnClose">Zamknij</button>
                 </div>
 
             </div>
@@ -78,3 +80,25 @@
     </footer>
 </body>
 </html>
+
+<template id="currencyCard">
+    <div class="currencyCard">
+        <span class="currencyName">
+            <slot name="name">Default Name</slot>
+        </span>
+        <span class="currencyCode">
+            <b>(<slot name="code">Default Code</slot>)</b>
+        </span>
+    </div>
+</template>
+
+<template id="currencyRateCard">
+    <div class="currencyCard">
+        <span class="currencyName">
+            <slot name="name">Default Name</slot>
+        </span>
+        <span class="currencyRate">
+            <b><slot name="rate">Default Rate</slot></b>
+        </span>
+    </div>
+</template>
