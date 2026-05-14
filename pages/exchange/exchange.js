@@ -1,9 +1,18 @@
-import { APIgetAvailableCurrencies, APIgetCurrencyRates, APIgetCurrencyRatesRange } from '/scripts/apiFacade.js';
+import { APIgetAvailableCurrencies, APIgetCurrencyRates } from '/scripts/apiFacade.js';
 import { addDaysISO, toISODate } from '/scripts/ISODataParser.js';
-import { toggleActive, withLoading } from '/scripts/misc.js';
+import { toggleActive } from '/scripts/misc.js';
 import { formatRate } from '/scripts/dataParser.js';
 import { getLoggedUser, syncLoggedUser } from '/scripts/globalState.js';
-import Chart from "https://cdn.jsdelivr.net/npm/chart.js@4.4.3/auto/+esm";
+import { renderChart } from '/pages/exchange/currencyChart.js'
+
+let currentBaseCurrency = null;
+let currentSelectedCurrency = null;
+let currencyRate = null;
+
+function setCurrencyRate(rate) {
+    currencyRate = rate;
+    document.querySelector('.infoSubLabel').textContent = rate.toFixed(2);
+}
 
 function renderRates({ date, base, ratesArr }, selectedCurrencyCode) {
     const container = document.querySelector('.exchangeRates');
@@ -89,16 +98,10 @@ function createRateCard(root, rate, selectedCurrencyCode) {
     return rateCard;
 }
 
-var chart = null;
-const ctx = document.querySelector('.currencyChart');
-
-let currentBaseCurrency = null;
-let currentSelectedCurrency = null;
-let currencyRate = null;
-
 function clearDialogInputs() {
-    const chartInput = document.querySelector('.chartCurrencyAmount');
-    chartInput.textContent = "";
+    document.querySelector('.chartCurrencyAmount').textContent = "";
+    document.querySelector('.infoSubLabel').textContent = "";
+    document.querySelector('.chartCurrencyValue').textContent = "";
 }
 
 async function displayChartPopup(baseCurrency, selectedCurrency) {
@@ -107,6 +110,8 @@ async function displayChartPopup(baseCurrency, selectedCurrency) {
 
     currentBaseCurrency = baseCurrency;
     currentSelectedCurrency = selectedCurrency;
+
+    document.querySelector('.chartCurrencyCode').textContent = `(${baseCurrency.toUpperCase()})`;
 
     const startDateInput = document.querySelector('.startDate');
     const endDateInput = document.querySelector('.endDate');
@@ -125,68 +130,22 @@ async function displayChartPopup(baseCurrency, selectedCurrency) {
 
     const loggedUser = getLoggedUser();
     if (loggedUser && baseCurrency.toUpperCase() === loggedUser.userCurrency.toUpperCase()) {
-        document.querySelector('.buyButton').disabled = false;
+        document.querySelector('.btnKup').disabled = false;
     }
     else {
-        document.querySelector('.buyButton').disabled = true;
+        document.querySelector('.btnKup').disabled = true;
     }
 
-    renderChart(baseCurrency, selectedCurrency, range);
+    renderChart(baseCurrency, selectedCurrency, range, { onRateSelected: setCurrencyRate });
 }
 
-let selectedPoint = null;
 
-async function renderChart(baseCurrency, selectedCurrency, range) {
-    if(chart) chart.destroy();
-
-    let data = await withLoading(async () => APIgetCurrencyRatesRange(baseCurrency, range), ".loader");
-
-    const labels = data.map(elem => elem.date);
-    const chartData = {
-        labels: labels,
-        datasets: [{
-            label: `Cena jednostkowa waluty ${selectedCurrency.toUpperCase()}`,
-            data: data.map(elem => {
-                const rate = elem.ratesArr.find(r => r.code === selectedCurrency);
-                return rate ? rate.value : null;
-            }),
-            pointBackgroundColor: (ctx) => ctx.dataIndex === selectedPoint ? 'red' : 'blue',
-            pointRadius: (ctx) => ctx.dataIndex === selectedPoint ? 8 : 4,
-            fill: false,
-            borderColor: 'rgb(75, 192, 192)',
-            tension: 0.1
-        }]
-    };
-
-    chart = new Chart(ctx, {
-        type: 'line',
-        data: chartData,
-        options: {
-            onClick: (event, elements) => {
-                if (elements.length > 0) {
-                    const dataIndex = elements[0].index;
-                    const datasetIndex = elements[0].datasetIndex;
-                    const value = chart.data.datasets[datasetIndex].data[dataIndex];
-                    
-                    currencyRate = value;
-                    selectedPoint = dataIndex;
-                    
-                    chart.update();
-                }
-        },
-        }
-    });
-
-    selectedPoint = data.length - 1;
-    const lastRate = data[selectedPoint].ratesArr.find(r => r.code === selectedCurrency);
-    currencyRate = lastRate ? lastRate.value : null;
-}
 
 document.querySelector('.startDate').addEventListener('change', (e) => {
     if (currentBaseCurrency && currentSelectedCurrency) {
         const startDate = e.target.value;
         const endDate = document.querySelector('.endDate').value;
-        renderChart(currentBaseCurrency, currentSelectedCurrency, { startDate, endDate });
+        renderChart(currentBaseCurrency, currentSelectedCurrency, { startDate, endDate }, { onRateSelected: setCurrencyRate });
     }
 });
 
@@ -194,15 +153,15 @@ document.querySelector('.endDate').addEventListener('change', (e) => {
     if (currentBaseCurrency && currentSelectedCurrency) {
         const startDate = document.querySelector('.startDate').value;
         const endDate = e.target.value;
-        renderChart(currentBaseCurrency, currentSelectedCurrency, { startDate, endDate });
+        renderChart(currentBaseCurrency, currentSelectedCurrency, { startDate, endDate }, { onRateSelected: setCurrencyRate });
     }
 });
 
-document.querySelector('#calculateCurrency').addEventListener('click', (e) => {
+document.querySelector('.btnPrzelicz').addEventListener('click', (e) => {
     const amount = Number(document.querySelector('.chartCurrencyAmount').value);
     const displaySpan = document.querySelector('.chartCurrencyValue');
     
-    if (chart && !isNaN(amount)) {
+    if (currencyRate !== null && !isNaN(amount)) {
         displaySpan.innerHTML = (amount * currencyRate).toFixed(2) + ` ${currentSelectedCurrency.toUpperCase()}`;
     }
 });
@@ -248,9 +207,9 @@ function buyAsset(event) {
     loggedUser.ownedAssets.push(boughtAsset);
     loggedUser.balance -= amount;
     syncLoggedUser(loggedUser);
-    alert(`Kupiłeś ${totalCost} KRW!`);
+    alert(`Kupiłeś ${totalCost} ${currentSelectedCurrency}!`);
 }
 
-document.querySelector('.buyButton').addEventListener('click', buyAsset);   
+document.querySelector('.btnKup').addEventListener('click', buyAsset);   
 
 searchCurrency("");

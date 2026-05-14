@@ -23,10 +23,10 @@ async function renderOwnedAssets(loggedUser) {
     balanceElement.textContent = `Saldo: ${loggedUser.balance} PLN`;
     userCurrency.textContent = `Waluta użytkownika: ${loggedUser.userCurrency}`;
 
-    if (loggedUser.ownedAssets.length > 0) {
-        const assetsContainer = document.querySelector('.assetsList');
-        assetsContainer.innerHTML = '';
+    const assetsContainer = document.querySelector('.assetsList');
+    assetsContainer.innerHTML = '';
 
+    if (loggedUser.ownedAssets.length > 0) {
         for (const asset of loggedUser.ownedAssets) {
             const assetElement = await createAssetElement(asset);
             assetsContainer.appendChild(assetElement);
@@ -34,11 +34,11 @@ async function renderOwnedAssets(loggedUser) {
     }
 }
 
-async function getTodayCurrenctPrice(asset) {
+async function getTodayCurrencyPrice(asset) {
     const rates = await APIgetCurrencyRates(asset.name);
-    const todayCurrencyRate = rates.ratesArr.find(elem => elem.code.toUpperCase() == "pln".toUpperCase()).value;
+    const todayCurrencyRate = rates.ratesArr.find(elem => elem.code.toUpperCase() == getLoggedUser().userCurrency).value;
 
-    return (todayCurrencyRate * asset.quantity).toFixed(2);
+    return (todayCurrencyRate * asset.value).toFixed(2);
 }
 
 function logout() {
@@ -48,13 +48,11 @@ function logout() {
 }
 
 async function getAssetCompareString(asset) {
-    const todayPrice = await getTodayCurrenctPrice(asset);
-    const buyPrice = asset.value;
+    const todayPrice = await getTodayCurrencyPrice(asset);
+    const buyPrice = asset.quantity;
+    const priceDifference = todayPrice - buyPrice;
 
-    console.log(todayPrice, buyPrice)
-
-    let percent = todayPrice >= buyPrice ? '' : '-';
-    percent += ((todayPrice / buyPrice) * 100).toFixed(3) + '%';
+    let percent = ((priceDifference / todayPrice) * 100).toFixed(3) + '%';
     let difference = (todayPrice - buyPrice).toFixed(2);
 
     return {
@@ -64,16 +62,15 @@ async function getAssetCompareString(asset) {
 }
 
 async function sellAsset(asset) {
-    const todayPrice = await getTodayCurrenctPrice(asset);
+    const todayPrice = await getTodayCurrencyPrice(asset);
     const loggedUser = getLoggedUser();
 
     if (!loggedUser) {
         alert("Coś poszło nie tak...");
         return;
     }
-    
-    const sellPrice = asset.quantity * todayPrice;
-    loggedUser.balance += sellPrice;
+
+    loggedUser.balance += Number(todayPrice.toFixed(2));
 
     const soldAssetIndex = loggedUser.ownedAssets.findIndex(elem => 
         elem.name == asset.name &&
