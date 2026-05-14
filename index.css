@@ -1,7 +1,6 @@
 @import './styles/header.css';
 @import '/styles/global.css';
 
-/* Główne ustawienia */
 body {
   background: #000;
   color: #fff;
@@ -23,7 +22,6 @@ body {
   width: 100%;
 }
 
-/* Nagłówek główny */
 h1 {
   font-size: 1.8rem;
   margin-bottom: 24px;
@@ -47,7 +45,6 @@ h1 {
     transform: translateY(0);
   }
 }
-/* Podtekst */
 
 u {
   font-size: 0.9rem;
@@ -70,7 +67,6 @@ u {
     transform: translateY(0);
   }
 }
-/* Hero sekcja */
 
 .hero h2 {
   font-size: 1.6rem;
@@ -94,7 +90,6 @@ p {
   color: #d0d0d0;
   background: transparent;
   letter-spacing: 0.2px;
-/* Sekcja kursów */
 }
 
 .rates {
@@ -131,7 +126,6 @@ p {
   gap: 15px;             
   margin: 20px auto 0;
   width: 100%;
-/* Karty kursów */
 }
 
 .course-item {
@@ -168,7 +162,6 @@ p {
 .course-item strong {
   font-size: 1.2rem;
   color: #0ac9d7;
-/* Nagłówek */
   text-shadow: 0 0 10px rgba(10, 201, 215, 0.4);
 }
 
@@ -240,7 +233,6 @@ p {
   color: #d0d0d0;
 }
 
-/* Tabela - siatka kart */
 .features-table {
   overflow: visible;
 }
@@ -301,13 +293,11 @@ table tbody td:last-child {
   line-height: 1.5;
 }
 
-/* Linki */
 a {
   color: #ffffff;
 }
 
-/* Stopka */
-footer, .footer {
+.footer {
   background: #000;
   color: #dfdfdf;
 }
@@ -493,7 +483,6 @@ nav a:hover {
   }
 }
 
-/* Mobilne urządzenia */
 @media (max-width: 767px) {
   .hamburger {
     display: flex;
