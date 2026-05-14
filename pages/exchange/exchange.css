@@ -435,30 +435,30 @@ label, .infoLabel, .resultLabel, .inputGroup span, .inputGroup p {
     transform: translateY(-1px);
 }
 
-.footer {
+footer {
     background: #000;
     color: #dfdfdf;
 }
 
-.footer-inner {
+footer .footer-inner {
     max-width: 1200px;
     margin: 0 auto;
     padding: 15px 20px;
     text-align: center;
 }
 
-.footer p {
+footer p {
     margin: 4px 0;
     font-size: 0.8rem;
 }
 
-.footer a {
+footer a {
     color: #ffffff;
     text-decoration: none;
     font-weight: 600;
 }
 
-.footer a:hover {
+footer a:hover {
     text-decoration: underline;
 }
 
