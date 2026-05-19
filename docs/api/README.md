@@ -1,0 +1,1 @@
+Dokumentacja wygenerowana sposobem :woozy_face:
