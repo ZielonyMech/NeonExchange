@@ -10,7 +10,6 @@ window.addEventListener('load', async () => {
     }
 
     document.querySelector('#logout').addEventListener('click', logout);
-    document.querySelector('#startDate').addEventListener('change', () => drawAccountChart(loggedUser));
 
     await renderOwnedAssets(loggedUser);
 });
@@ -27,12 +26,12 @@ async function renderOwnedAssets(loggedUser) {
     userCurrency.textContent = loggedUser.userCurrency;
 
     const assetsContainer = document.querySelector('.assetsList');
-    assetsContainer.innerHTML = '';
 
     let totalAssetValue = 0;
     let totalDifference = 0;
 
     if (loggedUser.ownedAssets.length > 0) {
+        assetsContainer.innerHTML = '';
         for (const asset of loggedUser.ownedAssets) {
             const assetElement = await createAssetElement(asset);
             assetsContainer.appendChild(assetElement);
@@ -43,16 +42,6 @@ async function renderOwnedAssets(loggedUser) {
             totalAssetValue += todayValue;
             totalDifference += todayValue - purchaseValue;
         }
-    } else {
-        assetsContainer.innerHTML = `
-            <div class="assetCard empty-state">
-                <div class="asset-row empty-row">
-                    <div class="asset-cell empty-cell">
-                        <span class="empty-text">Brak aktywów do wyświetlenia</span>
-                    </div>
-                </div>
-            </div>
-        `;
     }
 
     totalBalanceElement.textContent = `${(Number(loggedUser.balance) + totalAssetValue).toFixed(2)} PLN`;
