@@ -241,11 +241,31 @@ main {
     align-items: start;
 }
 
+.asset-row.empty-row {
+    grid-template-columns: 1fr;
+    align-items: center;
+}
+
 .asset-cell {
     display: flex;
     flex-direction: column;
     gap: 10px;
     min-width: 0;
+}
+
+.empty-cell {
+    justify-content: center;
+    align-items: center;
+}
+
+.empty-text {
+    display: block;
+    width: 100%;
+    text-align: center;
+    font-size: 1.1rem;
+    color: #c7d7e7;
+    font-weight: 700;
+    padding: 18px 0;
 }
 
 .cell-label {

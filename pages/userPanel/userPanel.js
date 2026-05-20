@@ -44,7 +44,15 @@ async function renderOwnedAssets(loggedUser) {
             totalDifference += todayValue - purchaseValue;
         }
     } else {
-        assetsContainer.innerHTML = '<div class="empty-state">Brak aktywów do wyświetlenia</div>';
+        assetsContainer.innerHTML = `
+            <div class="assetCard empty-state">
+                <div class="asset-row empty-row">
+                    <div class="asset-cell empty-cell">
+                        <span class="empty-text">Brak aktywów do wyświetlenia</span>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 
     totalBalanceElement.textContent = `${(Number(loggedUser.balance) + totalAssetValue).toFixed(2)} PLN`;
