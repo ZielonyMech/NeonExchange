@@ -1,29 +1,74 @@
-<!DOCTYPE html>
-<html lang="en">
+﻿<!DOCTYPE html>
+<html lang="pl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel użytkownika</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crete+Round:ital@0;1&family=Jost:ital,wght@0,100..900;1,100..900&family=Pacifico&display=swap" rel="stylesheet">
+    <link href="./userPanel.css" rel="stylesheet">
     <script src="/scripts/bootstrap.js" type="module"></script>
     <script src="./userPanel.js" type="module" defer></script>
-    <link href="./userPanel.css" rel="stylesheet">
-    <title>Panel użytkownika</title>
 </head>
 <body>
-    <app-header class="header"></app-header>
-    
-    <main>
-        <h1>Witaj na swoim panelu!</h1>
-        
-        <div class="userDetails">
-            <span id="username"></span>
-            <span id="balance"></span>
-            <span id="userCurrency"></span>
-            <button id="logout">Wyloguj się</button>
-        </div>
+    <app-header></app-header>
 
-        <section class="assetContainer">
-            <h2>Twoje aktywa</h2>
-            <div class="assetsList"></div>
+    <main>
+        <section class="user-panel">
+            <div class="dashboard-grid">
+                <article class="summary-card user-card">
+                    <div class="summary-card-header">
+                        <h2>Informacje o koncie</h2>
+                    </div>
+                    <div class="user-info-grid">
+                        <div class="info-block">
+                            <span class="info-label">Nazwa użytkownika</span>
+                            <span id="username" class="info-value"></span>
+                        </div>
+                        <div class="info-block">
+                            <span class="info-label">Saldo</span>
+                            <span id="balance" class="info-value"></span>
+                        </div>
+                        <div class="info-block">
+                            <span class="info-label">Waluta</span>
+                            <span id="userCurrency" class="info-value"></span>
+                        </div>
+                    </div>
+                    <button id="logout" class="btn logout-btn">Wyloguj się</button>
+                </article>
+
+                <article class="summary-card chart-card">
+                    <div class="summary-card-header">
+                        <h2>Stan twojego konta w czasie</h2>
+                    </div>
+                    <div class="chart-preview">
+                        <canvas id="accountChart" class="account-chart" aria-label="Wykres stanu konta"></canvas>
+                    </div>
+                    <div class="summary-values">
+                        <div class="summary-row">
+                            <span class="summary-label">Środki wraz z aktywami</span>
+                            <span id="totalBalance" class="summary-number">0 PLN</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Status względem dnia</span>
+                            <span id="dayStatus" class="summary-number status positive">+0,00 PLN</span>
+                        </div>
+                    </div>
+                    <form class="chart-controls" aria-label="Kontrola wykresu">
+                        <label for="startDate">Data początkowa</label>
+                        <input type="date" id="startDate" name="startDate">
+                        <button type="button" class="btn add-funds">Dodaj środki</button>
+                    </form>
+                </article>
+            </div>
+
+            <section class="positions-section">
+                <div class="section-title">
+                    <h2>Posiadane pozycje</h2>
+                </div>
+                <div class="positions-list assetsList"></div>
+            </section>
         </section>
     </main>
 </body>
@@ -31,15 +76,28 @@
 
 <template id="assetCard">
     <div class="assetCard">
-        <span class="assetName">Nazwa waluty <slot name="name"></slot></span>
-        <span class="assetQuantity">Ilość <slot name="quantity"></slot></span>
-        <span class="assetBuyDate"><slot name="buyDate"></slot></span>
-        <span class="assetCurrentValue"><slot name="currentValue"></slot></span>
-        <span class="assetBuyPrice">Wartość w dniu zakupu <slot name="buyPrice"></slot></span>
-        <div class="compareSlot">
-            <span class="assetComparePercent"><slot name="assetComparePercent"></slot></span>
-            <span class="assetCompareDifference"><slot name="assetCompareDifference"></slot></span>
+        <div class="asset-row">
+            <div class="asset-cell asset-name">
+                <span class="cell-label">Zakupione aktywo</span>
+                <span><slot name="name"></slot></span>
+            </div>
+            <div class="asset-cell asset-quantity">
+                <span class="cell-label">Ilość zakupionego aktywa</span>
+                <span><slot name="quantity"></slot></span>
+            </div>
+            <div class="asset-cell asset-buy-price">
+                <span class="cell-label">Wartość w dniu zakupu</span>
+                <span><slot name="buyPrice"></slot></span>
+            </div>
+            <div class="asset-cell asset-current-value">
+                <span class="cell-label">Wartość na dzisiaj</span>
+                <span><slot name="currentValue"></slot></span>
+            </div>
+            <div class="asset-cell asset-diff">
+                <span class="cell-label">Zysk / strata względem dzisiaj</span>
+                <span class="diff-value"><slot name="assetCompareDifference"></slot></span>
+            </div>
         </div>
-        <button class="sellButton">Sprzedaj pozycję</button>
+        <button class="btn sell-btn" type="button">Sprzedaj</button>
     </div>
 </template>

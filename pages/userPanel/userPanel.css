@@ -1,24 +1,366 @@
-.userDetails {
+@import '../../styles/global.css';
+
+body {
+    background: #000;
+    color: #fff;
+    font-family: 'Crete Round', serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+main {
+    grid-column: 2;
+    width: 100%;
+    padding: 40px 20px;
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.user-panel {
+    width: 100%;
+    max-width: 1160px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: minmax(280px, 1fr) minmax(320px, 1.4fr);
+    gap: 24px;
+}
+
+.summary-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 28px;
+    padding: 28px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.summary-card-header h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    color: #fff;
+    letter-spacing: 0.02em;
+}
+
+.user-card {
+    min-height: 320px;
+}
+
+.user-info-grid {
+    display: grid;
+    gap: 18px;
+}
+
+.info-block {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 20px 18px;
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-.assetContainer {
+.info-label {
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #0ac9d7;
+}
+
+.info-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.logout-btn,
+.add-funds,
+.sell-btn {
+    width: 100%;
+    border-radius: 12px;
+    border: none;
+    padding: 14px 16px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.logout-btn,
+.add-funds {
+    background: rgba(10, 201, 215, 0.18);
+    color: #fff;
+    border: 1px solid rgba(10, 201, 215, 0.4);
+}
+
+.logout-btn:hover,
+.add-funds:hover,
+.sell-btn:hover {
+    background: rgba(10, 201, 215, 0.28);
+}
+
+.sell-btn {
     margin-top: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #fff;
+}
+
+.sell-btn:hover {
+    background: rgba(10, 201, 215, 0.2);
+}
+
+.chart-card {
+    min-height: 320px;
+}
+
+.chart-preview {
+    border-radius: 24px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border: 1px solid rgba(10, 201, 215, 0.16);
+    padding: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 240px;
+}
+
+.account-chart {
+    width: 100%;
+    height: 100%;
+    border-radius: 20px;
+}
+
+.summary-values {
+    display: grid;
+    gap: 16px;
+}
+
+.summary-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 18px 16px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.summary-label {
+    font-size: 0.85rem;
+    color: #c7d7e7;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.summary-number {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+.status.positive {
+    color: #7ceb70;
+}
+
+.status.negative {
+    color: #ff5f6d;
+}
+
+.chart-controls {
+    display: grid;
+    gap: 16px;
+    width: 100%;
+    max-width: 460px;
+}
+
+.chart-controls label {
+    font-size: 0.95rem;
+    color: #c7d7e7;
+}
+
+.chart-controls input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+.chart-controls input:focus {
+    outline: none;
+    border-color: #0ac9d7;
+    box-shadow: 0 0 12px rgba(10, 201, 215, 0.18);
+}
+
+.positions-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.section-title {
+    display: flex;
+    justify-content: center;
+}
+
+.section-title h2 {
+    margin: 0;
+    font-size: 1.9rem;
+    letter-spacing: 0.02em;
+    color: #fff;
+}
+
+.positions-list {
+    display: grid;
+    gap: 16px;
 }
 
 .assetCard {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
 }
 
-.compareSlot {
+.asset-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    align-items: start;
+}
+
+.asset-cell {
     display: flex;
     flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+}
+
+.cell-label {
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    color: #a9b4c9;
+    letter-spacing: 0.06em;
+}
+
+.asset-cell span:last-child {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    word-break: break-word;
+}
+
+.asset-name span:last-child {
+    color: #0ac9d7;
+}
+
+.asset-diff .diff-value {
+    color: #ff5f6d;
+    font-weight: 800;
+}
+
+.assetCard.positive .asset-diff .diff-value {
+    color: #7ceb70;
+}
+
+.assetCard.negative .asset-diff .diff-value {
+    color: #ff5f6d;
+}
+
+@media (max-width: 960px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 760px) {
+    main {
+        padding: 28px 14px;
+    }
+
+    .summary-card {
+        padding: 22px;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .asset-row {
+        grid-template-columns: 1fr;
+    }
+
+    .user-info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    main {
+        padding: 22px 12px;
+    }
+
+    .summary-card {
+        padding: 18px;
+    }
+
+    .chart-controls {
+        max-width: 100%;
+        gap: 12px;
+    }
+
+    .info-block,
+    .summary-row,
+    .chart-preview,
+    .chart-controls,
+    .user-info-grid,
+    .assetCard {
+        width: 100%;
+    }
+
+    .info-block {
+        padding: 16px;
+    }
+
+    .chart-preview {
+        min-height: 200px;
+    }
+
+    .summary-card-header h2,
+    .section-title h2 {
+        font-size: 1.3rem;
+    }
+
+    .asset-row {
+        gap: 12px;
+    }
+
+    .asset-cell span:last-child {
+        font-size: 1rem;
+    }
+
+    .info-value {
+        font-size: 1.35rem;
+    }
+
+    .summary-number {
+        font-size: 1.6rem;
+    }
+
+    .chart-controls input,
+    .add-funds {
+        font-size: 1rem;
+    }
 }
