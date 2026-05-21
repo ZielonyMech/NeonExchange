@@ -1,6 +1,7 @@
 @import '../../styles/global.css';
 
 body {
+    /*wersja dla głuchych*/
     background: #000;
     color: #fff;
     font-family: 'Crete Round', serif;
