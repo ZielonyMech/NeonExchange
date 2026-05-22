@@ -1,6 +1,42 @@
 @import './styles/header.css';
 @import '/styles/global.css';
+.hidden-checkbox { display: none; }
+.font-switch-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    padding: 10px 20px;
+    background: #0ac9d7;
+    color: #000;
+    cursor: pointer;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 16px;
+    border: 2px solid white;
+}
 
+#font-toggle:checked ~ html,
+#font-toggle:checked ~ * {
+    font-size: 150% !important;
+}
+
+#font-toggle:checked ~ * h1,
+#font-toggle:checked ~ * h2,
+#font-toggle:checked ~ * p,
+#font-toggle:checked ~ * span,
+#font-toggle:checked ~ * u,
+#font-toggle:checked ~ * td,
+#font-toggle:checked ~ * a {
+    font-size: inherit !important;
+}
+
+#font-toggle:checked ~ * .course-item,
+#font-toggle:checked ~ * .cta-btn,
+#font-toggle:checked ~ * section {
+    height: auto !important;
+    padding: 2em !important;
+}
 body {
   background: #000;
   color: #fff;
