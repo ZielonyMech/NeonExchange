@@ -1,5 +1,5 @@
 import { APIgetAvailableCurrencies, APIgetCurrencyRates } from '/scripts/apiFacade.js';
-import { addDaysISO, toISODate } from '/scripts/ISODataParser.js';
+import { addDaysISO, toISODate } from '/scripts/ISODateParser.js';
 import { toggleActive } from '/scripts/misc.js';
 import { formatRate } from '/scripts/dataParser.js';
 import { getLoggedUser, syncLoggedUser } from '/scripts/globalState.js';
@@ -7,11 +7,15 @@ import { renderChart } from '/pages/exchange/currencyChart.js'
 
 let currentBaseCurrency = null;
 let currentSelectedCurrency = null;
-let currencyRate = null;
 
-function setCurrencyRate(rate) {
-    currencyRate = rate;
-    document.querySelector('.infoSubLabel').textContent = rate.toFixed(2);
+let currencyRate = null;
+let currencyDate = null;
+
+function setCurrencyRate({value, date}) {
+    currencyRate = value ?? 0;
+    currencyDate = date ?? "";
+
+    document.querySelector('.infoSubLabel').textContent = formatRate(currencyRate);
 }
 
 function renderRates({ date, base, ratesArr }, selectedCurrencyCode) {
@@ -99,12 +103,14 @@ function createRateCard(root, rate, selectedCurrencyCode) {
 }
 
 function clearDialogInputs() {
-    document.querySelector('.chartCurrencyAmount').textContent = "";
-    document.querySelector('.infoSubLabel').textContent = "";
     document.querySelector('.chartCurrencyValue').textContent = "";
+    document.querySelector('.infoSubLabel').textContent = "";
+    document.querySelector('.chartCurrencyAmount').value = "";
 }
 
 async function displayChartPopup(baseCurrency, selectedCurrency) {
+    clearDialogInputs();''
+
     const dialog = document.querySelector('#chartDialog');
     dialog.showModal();
 
@@ -138,8 +144,6 @@ async function displayChartPopup(baseCurrency, selectedCurrency) {
 
     renderChart(baseCurrency, selectedCurrency, range, { onRateSelected: setCurrencyRate });
 }
-
-
 
 document.querySelector('.startDate').addEventListener('change', (e) => {
     if (currentBaseCurrency && currentSelectedCurrency) {
@@ -201,7 +205,7 @@ function buyAsset(event) {
         name: currentSelectedCurrency.toUpperCase(),
         quantity: amount,
         value: totalCost,
-        buyDate: new Date().toISOString()
+        buyDate: new Date(currencyDate).toISOString()
     }
 
     loggedUser.ownedAssets.push(boughtAsset);

@@ -20,10 +20,13 @@ async function renderOwnedAssets(loggedUser) {
     const userCurrency = document.querySelector('#userCurrency');
     const totalBalanceElement = document.querySelector('#totalBalance');
     const dayStatusElement = document.querySelector('#dayStatus');
-
+    const creationDateElement = document.querySelector('#creationDate');
+    const datePicker = document.querySelector('#startDate');
+    
     usernameElement.textContent = loggedUser.email;
     balanceElement.textContent = `${Number(loggedUser.balance).toFixed(2)} PLN`;
     userCurrency.textContent = loggedUser.userCurrency;
+    creationDateElement.textContent = new Date(loggedUser.creationDate).toLocaleDateString();
 
     const assetsContainer = document.querySelector('.assetsList');
 
@@ -36,7 +39,7 @@ async function renderOwnedAssets(loggedUser) {
             const assetElement = await createAssetElement(asset);
             assetsContainer.appendChild(assetElement);
 
-            const todayValue = Number(await getTodayCurrencyPrice(asset));
+            const todayValue = Number((await getTodayCurrencyPrice(asset)).accountCurrencyValue) || 0;
             const purchaseValue = Number(asset.value) || 0;
 
             totalAssetValue += todayValue;
@@ -49,14 +52,28 @@ async function renderOwnedAssets(loggedUser) {
     dayStatusElement.classList.toggle('positive', totalDifference >= 0);
     dayStatusElement.classList.toggle('negative', totalDifference < 0);
 
-    drawAccountChart(loggedUser);
+    datePicker.setAttribute('max', new Date().toISOString().split('T')[0]);
+    datePicker.setAttribute('min', loggedUser.creationDate.split('T')[0]);
+    datePicker.value = datePicker.getAttribute('min');
+
+    // drawAccountChart(loggedUser);
 }
 
 async function getTodayCurrencyPrice(asset) {
-    const rates = await APIgetCurrencyRates(asset.name);
     const loggedUser = getLoggedUser();
-    const todayCurrencyRate = rates.ratesArr.find(elem => elem.code.toUpperCase() === loggedUser.userCurrency)?.value || 0;
-    return (todayCurrencyRate * asset.quantity).toFixed(2);
+    
+    const boughtCurrencyRate = await APIgetCurrencyRates(loggedUser.userCurrency);
+    const assetCurrencyRate = await APIgetCurrencyRates(asset.name);
+
+    const todayCurrencyRate = boughtCurrencyRate.ratesArr.find(elem => elem.code.toUpperCase() === asset.name.toUpperCase()).value;
+    const userCurrencyRate = assetCurrencyRate.ratesArr.find(elem => elem.code.toUpperCase() === loggedUser.userCurrency.toUpperCase()).value;
+    
+    const boughtCurrencyValue = (todayCurrencyRate * asset.quantity).toFixed(2);
+
+    return {
+        boughtCurrencyValue: boughtCurrencyValue,
+        accountCurrencyValue: (userCurrencyRate * boughtCurrencyValue).toFixed(2)
+    };
 }
 
 function logout() {
@@ -101,15 +118,19 @@ async function createAssetElement(asset) {
     const buyPriceElement = assetElement.querySelector('slot[name="buyPrice"]');
     const currentValueElement = assetElement.querySelector('slot[name="currentValue"]');
     const assetCompareDifference = assetElement.querySelector('slot[name="assetCompareDifference"]');
+    const buyDate = assetElement.querySelector('slot[name="buyDate"]');
     const assetCardElement = assetElement.querySelector('.assetCard');
     const sellButton = assetElement.querySelector('.sell-btn');
 
+    const todayAssetValue = (await getTodayCurrencyPrice(asset)).boughtCurrencyValue;
+
     nameElement.textContent = asset.name;
     quantityElement.textContent = asset.quantity;
-    buyPriceElement.textContent = `${Number(asset.value).toFixed(2)} PLN`;
-    currentValueElement.textContent = `${await getTodayCurrencyPrice(asset)} PLN`;
+    buyPriceElement.textContent = `${Number(asset.value).toFixed(2)} ${asset.name}`;
+    currentValueElement.textContent = `${todayAssetValue} ${asset.name}`;
+    buyDate.textContent = new Date(asset.buyDate).toLocaleDateString();
 
-    const todayPrice = Number(await getTodayCurrencyPrice(asset));
+    const todayPrice = Number(todayAssetValue) || 0;
     const buyPriceValue = Number(asset.value) || 0;
     const difference = (todayPrice - buyPriceValue).toFixed(2);
 
@@ -121,3 +142,7 @@ async function createAssetElement(asset) {
 
     return assetElement;
 }
+
+document.querySelector('#startDate').addEventListener('change', (e) => {
+    const selectedDate = e.target.value;
+});

@@ -34,6 +34,10 @@
                             <span class="info-label">Waluta</span>
                             <span id="userCurrency" class="info-value"></span>
                         </div>
+                        <div class="info-block">
+                            <span class="info-label">Data założenia konta</span>
+                            <span id="creationDate" class="info-value"></span>
+                        </div>
                     </div>
                     <button id="logout" class="btn logout-btn">Wyloguj się</button>
                 </article>
@@ -96,6 +100,10 @@
             <div class="asset-cell asset-buy-price">
                 <span class="cell-label">Wartość w dniu zakupu</span>
                 <span><slot name="buyPrice"></slot></span>
+            </div>
+            <div class="asset-cell asset-buy-price">
+                <span class="cell-label">Data zakupu</span>
+                <span><slot name="buyDate"></slot></span>
             </div>
             <div class="asset-cell asset-current-value">
                 <span class="cell-label">Wartość na dzisiaj</span>
