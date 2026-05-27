@@ -206,10 +206,12 @@ dialog {
     border: none;
     padding: 0;
     position: relative;
+    z-index: 0 !important;
 }
 
 dialog::backdrop {
     background: rgba(0, 0, 0, 0.8);
+    z-index: -1 !important;
 }
 
 .loaderContainer {

@@ -174,26 +174,26 @@ if (currencyInput) {
     });
 }
 
-function buyAsset(event) {
+async function buyAsset(event) {
     console.log(event);
     const amountInput = document.querySelector('.chartCurrencyAmount');
     const amount = Number(amountInput.value);
 
     if (isNaN(amount) || amount <= 0) {
-        alert("Podaj poprawną ilość do kupienia!");
+        NXPopup.toast({ type: 'warning', title: 'Nieprawidłowa ilość', message: 'Podaj poprawną ilość do kupienia!' });
         return;
     }
 
     const loggedUser = getLoggedUser();
     if (!loggedUser) {
-        alert("Musisz być zalogowany, aby kupić tę walutę!");
+        NXPopup.toast({ type: 'warning', title: 'Zaloguj się', message: 'Musisz być zalogowany, aby kupić tę walutę!' });
         return;
     }
 
     const totalCost = Number((amount * currencyRate).toFixed(2));
 
     if (amount > loggedUser.balance) {
-        alert("Brak wystarczających środków do zakupu waluty!");
+        await nxTransactionError();
         return;
     }
 
@@ -207,7 +207,7 @@ function buyAsset(event) {
     loggedUser.ownedAssets.push(boughtAsset);
     loggedUser.balance -= amount;
     syncLoggedUser(loggedUser);
-    alert(`Kupiłeś ${totalCost} ${currentSelectedCurrency}!`);
+    NXPopup.toast({ type: 'success', title: 'Zakup zakończony', message: `Kupiłeś ${totalCost} ${currentSelectedCurrency}!` });
 }
 
 document.querySelector('.btnKup').addEventListener('click', buyAsset);   

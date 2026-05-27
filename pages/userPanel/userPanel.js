@@ -4,7 +4,7 @@ import { APIgetCurrencyRates } from '/scripts/apiFacade.js';
 window.addEventListener('load', async () => {
     const loggedUser = getLoggedUser();
     if (!loggedUser) {
-        alert('Musisz być zalogowany, aby zobaczyć tę stronę!');
+        NXPopup.toast({ type: 'warning', title: 'Zaloguj się', message: 'Musisz być zalogowany, aby zobaczyć tę stronę!' });
         document.location.href = '/pages/auth/login/login.html';
         return;
     }
@@ -76,7 +76,7 @@ async function getTodayCurrencyPrice(asset) {
 
 function logout() {
     logoutCurrentUser();
-    alert('Pomyślnie wylogowano');
+    NXPopup.toast({ type: 'success', title: 'Wylogowano', message: 'Pomyślnie wylogowano' });
     document.location.href = '/index.html';
 }
 
@@ -85,7 +85,7 @@ async function sellAsset(asset) {
     const loggedUser = getLoggedUser();
 
     if (!loggedUser) {
-        alert('Coś poszło nie tak...');
+        NXPopup.toast({ type: 'error', title: 'Błąd', message: 'Coś poszło nie tak...' });
         return;
     }
 
@@ -101,7 +101,7 @@ async function sellAsset(asset) {
         loggedUser.ownedAssets.splice(soldAssetIndex, 1);
     }
 
-    alert('Udało się sprzedać aktywo!');
+    NXPopup.toast({ type: 'success', title: 'Sprzedano', message: 'Udało się sprzedać aktywo!' });
 
     syncLoggedUser(loggedUser);
     await renderOwnedAssets(loggedUser);

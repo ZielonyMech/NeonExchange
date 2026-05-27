@@ -18,13 +18,13 @@ async function loginUser(user) {
     const hashedPassword = await hashSomething(user.password, 'SHA-512');
 
     if (foundUser && foundUser.password === hashedPassword) {
-        alert('Logowanie zakończone sukcesem!');
+        NXPopup.toast({ type: 'success', title: 'Zalogowano', message: 'Logowanie zakończone sukcesem!' });
         setLoggedUser(foundUser);
         document.location.href="/";
         return;
     }
 
-    alert('Nieprawidłowy email lub hasło!');
+    NXPopup.toast({ type: 'error', title: 'Błąd', message: 'Nieprawidłowy email lub hasło!' });
 }
      
 

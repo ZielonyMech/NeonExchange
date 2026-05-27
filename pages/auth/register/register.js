@@ -11,16 +11,16 @@ async function register(event) {
     const confirmPassword = document.querySelector('#confirmPassword');
 
     if (password.value !== confirmPassword.value) {
-        alert('Hasła nie są identyczne!');
+        NXPopup.toast({ type: 'warning', title: 'Uwaga', message: 'Hasła nie są identyczne!' });
         return;
     }
     
     if(!(await registerUser(email.value, password.value, currency.value))) {
-        alert('Cos poszlo nie tak...');
+        NXPopup.toast({ type: 'error', title: 'Błąd', message: 'Coś poszło nie tak...' });
         return;
     }
     
-    alert('Rejestracja zakończona sukcesem! Możesz teraz się zalogować.');
+    NXPopup.toast({ type: 'success', title: 'Sukces', message: 'Rejestracja zakończona sukcesem! Możesz teraz się zalogować.' });
     document.location.href = '/pages/auth/login/login.html';
 }
 
