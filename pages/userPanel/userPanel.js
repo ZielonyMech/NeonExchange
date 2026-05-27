@@ -10,6 +10,21 @@ window.addEventListener('load', async () => {
     }
 
     document.querySelector('#logout').addEventListener('click', logout);
+    
+    // Tab switching
+    const tabButtons = document.querySelectorAll('.tab-button');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            
+            const tabId = button.getAttribute('data-tab');
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
 
     await renderOwnedAssets(loggedUser);
 });

@@ -71,11 +71,30 @@
                 <div class="section-title">
                     <h2>Posiadane pozycje</h2>
                 </div>
-                <div class="positions-list assetsList">
-                    <div class="assetCard empty-state">
-                        <div class="asset-row empty-row">
-                            <div class="asset-cell empty-cell">
-                                <span class="empty-text">Brak aktywów do wyświetlenia</span>
+                <div class="tabs-container">
+                    <div class="tabs-header">
+                        <button class="tab-button active" data-tab="current-positions">Aktualne pozycje</button>
+                        <button class="tab-button" data-tab="history">Historia</button>
+                    </div>
+                    <div class="tab-content active" id="current-positions">
+                        <div class="positions-list assetsList">
+                            <div class="assetCard empty-state">
+                                <div class="asset-row empty-row">
+                                    <div class="asset-cell empty-cell">
+                                        <span class="empty-text">Brak aktywów do wyświetlenia</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-content" id="history">
+                        <div class="positions-list historyList">
+                            <div class="assetCard empty-state">
+                                <div class="asset-row empty-row">
+                                    <div class="asset-cell empty-cell">
+                                        <span class="empty-text">Brak historii do wyświetlenia</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
