@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="preconnect" href="https://fonts.googleapis.com">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Crete+Round:ital@0;1&family=Jost:ital,wght@0,100..900;1,100..900&family=Pacifico&display=swap" rel="stylesheet">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Crete+Round:ital@0;1&family=Jost:ital,wght@0,100..900;1,100..900&family=Pacifico&display=swap" rel="stylesheet">
         <link rel="preload" href="components/header/header.html" as="fetch" crossorigin>
         <link href="index.css" rel="stylesheet">
         <script src="/scripts/bootstrap.js" type="module"></script>
@@ -15,25 +14,24 @@
     <body>
         <app-header class="header"></app-header>
 
-        <main id="home">
-            <h1>Wymieniaj waluty błyskawicznie ⚡</h1>
-            <u>Szybko, bezpiecznie i najkorzystniej — wszystkie kursy w jednym miejscu 🔥🌍</u>
+        <main id="home" role="main">
+            <h1>Wymieniaj waluty błyskawicznie <span aria-hidden="true">⚡</span></h1>
+            <p>Szybko, bezpiecznie i najkorzystniej — wszystkie kursy w jednym miejscu <span aria-hidden="true">🔥🌍</span></p>
             <a href="pages/exchange/exchange.html" id="checkRatesBtn" class="cta-btn">Sprawdź kursy</a>
             
-            <section class="rates" id="rates">
-                <h2>🔄Aktualne kursy walut</h2>
-                <div class="course-list">
-                    <div class="course-item"><span>USD / PLN</span><strong>4.12</strong></div>
-                    <div class="course-item"><span>EUR / PLN</span><strong>4.51</strong></div>
-                    <div class="course-item"><span>GBP / PLN</span><strong>5.28</strong></div>
-                     <div class="course-item"><span>РУБ / PLN</span><strong>0.047</strong></div>
-                    
+            <section class="rates" id="rates" aria-labelledby="rates-heading">
+                <h2 id="rates-heading"><span aria-hidden="true">🔄</span> Aktualne kursy walut</h2>
+                <div class="course-list" role="list">
+                    <div class="course-item" role="listitem"><span>USD / PLN</span><strong>4.12</strong></div>
+                    <div class="course-item" role="listitem"><span>EUR / PLN</span><strong>4.51</strong></div>
+                    <div class="course-item" role="listitem"><span>GBP / PLN</span><strong>5.28</strong></div>
+                    <div class="course-item" role="listitem"><span>РУБ / PLN</span><strong>0.047</strong></div>
                 </div>
             </section>
 
-            <section class="about" id="about">
-                <h2>ℹ️ O nas</h2>
-                <p>NeonExchange to nowoczesna platforma do wymiany walut, stworzona z myślą o szybkości, bezpieczeństwie i najlepszych kursach. Naszą misją jest dostarczanie najbardziej niezawodnych narzędzi do wymiany walut w jednym miejscu.</p>
+            <section class="about" id="about" aria-labelledby="about-heading">
+                <h2 id="about-heading"> <span aria-hidden="true">ℹ️</span> O nas</h2>
+                <p>NeonExchange to nowoczesna platforma do wymiany walut, stworzona z myślą o szybkości, bezpieczeństwie i najlepszych kursach.Naszą misją jest dostarczanie najbardziej niezawodnych narzędzi do wymiany walut w jednym miejscu.</p>
                 
                 <div class="features-table">
                     <table>
@@ -62,10 +60,14 @@
             </section>
         </main>
 
-        <footer>
+        <footer role="contentinfo">
             <div class="footer-inner">
                 <p>&copy; 2026 NeonExchange. Wszelkie prawa zastrzeżone.</p>
-                <p><a href="#contact">Kontakt</a> · <a href="#about">O nas</a> · <a href="#privacy">Polityka prywatności</a></p>
+                <nav aria-label="Stopka">
+                    <a href="#contact" aria-label="Przejdź do sekcji kontaktowej">Kontakt</a> · 
+                    <a href="#about" aria-label="Dowiedz się więcej o nas">O nas</a> · 
+                    <a href="#privacy" aria-label="Przeczytaj politykę prywatności">Polityka prywatności</a>
+                </nav>
             </div>
         </footer>
     </body>
