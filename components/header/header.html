@@ -116,8 +116,8 @@
 
     <header class="header">
         <div class="header-inner">
-            <div class="brand"><slot name="brand">NeonExchange🔄</slot></div>
-            <button class="hamburger" id="hamburger" aria-label="Przełącz menu" aria-expanded="false">
+            <div class="brand"><slot name="brand">NeonExchange<span aria-hidden="true">🔄</span></slot></div>
+            <button class="hamburger" id="hamburger" aria-expanded="false">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -125,10 +125,10 @@
             <nav class="nav-menu" id="navMenu" aria-label="Główna nawigacja">
                 <slot name="nav">
                     <ul>
-                        <li><a href="/index.html">Strona główna</a></li>
-                        <li><a href="/pages/exchange/exchange.html">Usługi</a></li>
-                        <li><a href="#contact">Kontakt</a></li>
-                        <li><a id="loginLink" href="/pages/auth/login/login.html">Logowanie</a></li>
+                        <li><a aria-label="przejdź do strony głównej" href="/index.html"> Strona główna</a></li>
+                        <li><a aria-label="przejdź do usług" href="/pages/exchange/exchange.html">Usługi</a></li>
+                        <li><a aria-label="skontakuj się z nami" href="#contact">Kontakt</a></li>
+                        <li><a aria-label="zaloguj się" id="loginLink" href="/pages/auth/login/login.html">Logowanie</a></li>
                     </ul>
                 </slot>
             </nav>
