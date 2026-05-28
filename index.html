@@ -12,14 +12,14 @@
         <title>NeonExchange</title>
     </head>
     <body>
-        <app-header class="header"></app-header>
+        <app-header class="header" role="banner"></app-header>
 
         <main id="home" role="main">
             <h1>Wymieniaj waluty błyskawicznie <span aria-hidden="true">⚡</span></h1>
             <p>Szybko, bezpiecznie i najkorzystniej — wszystkie kursy w jednym miejscu <span aria-hidden="true">🔥🌍</span></p>
-            <a href="pages/exchange/exchange.html" id="checkRatesBtn" class="cta-btn">Sprawdź kursy</a>
+            <a href="pages/exchange/exchange.html" id="checkRatesBtn" aria-label="sprawdź kursy walut" class="cta-btn">Sprawdź kursy</a>
             
-            <section class="rates" id="rates" aria-labelledby="rates-heading">
+            <section class="rates" id="rates">
                 <h2 id="rates-heading"><span aria-hidden="true">🔄</span> Aktualne kursy walut</h2>
                 <div class="course-list" role="list">
                     <div class="course-item" role="listitem"><span>USD / PLN</span><strong>4.12</strong></div>
@@ -31,7 +31,7 @@
 
             <section class="about" id="about" aria-labelledby="about-heading">
                 <h2 id="about-heading"> <span aria-hidden="true">ℹ️</span> O nas</h2>
-                <p>NeonExchange to nowoczesna platforma do wymiany walut, stworzona z myślą o szybkości, bezpieczeństwie i najlepszych kursach.Naszą misją jest dostarczanie najbardziej niezawodnych narzędzi do wymiany walut w jednym miejscu.</p>
+                <p>NeonExchange to nowoczesna platforma do wymiany walut, stworzona z myślą o szybkości, bezpieczeństwie i najlepszych kursach. Naszą misją jest dostarczanie najbardziej niezawodnych narzędzi do wymiany walut w jednym miejscu.</p>
                 
                 <div class="features-table">
                     <table>
@@ -63,7 +63,7 @@
         <footer role="contentinfo">
             <div class="footer-inner">
                 <p>&copy; 2026 NeonExchange. Wszelkie prawa zastrzeżone.</p>
-                <nav aria-label="Stopka">
+                <nav aria-label="Stopka" role="navigation">
                     <a href="#contact" aria-label="Przejdź do sekcji kontaktowej">Kontakt</a> · 
                     <a href="#about" aria-label="Dowiedz się więcej o nas">O nas</a> · 
                     <a href="#privacy" aria-label="Przeczytaj politykę prywatności">Polityka prywatności</a>
