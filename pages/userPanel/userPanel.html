@@ -55,7 +55,7 @@
                             <span id="totalBalance" class="summary-number">0 PLN</span>
                         </div>
                         <div class="summary-row">
-                            <span class="summary-label">Status względem dnia</span>
+                            <span class="summary-label">Status względem wybranego dnia</span>
                             <span id="dayStatus" class="summary-number status positive">+0,00 PLN</span>
                         </div>
                     </div>
@@ -134,5 +134,36 @@
             </div>
         </div>
         <button class="btn sell-btn" type="button">Sprzedaj</button>
+    </div>
+</template>
+
+<template id="historyCard">
+    <div class="assetCard">
+        <div class="asset-row">
+            <div class="asset-cell asset-name">
+                <span class="cell-label">Sprzedane aktywo</span>
+                <span><slot name="name"></slot></span>
+            </div>
+            <div class="asset-cell asset-quantity">
+                <span class="cell-label">Ilość sprzedanego aktywa</span>
+                <span><slot name="quantity"></slot></span>
+            </div>
+            <div class="asset-cell asset-buy-price">
+                <span class="cell-label">Wartość w dniu zakupu</span>
+                <span><slot name="buyPrice"></slot></span>
+            </div>
+            <div class="asset-cell asset-buy-price">
+                <span class="cell-label">Data zakupu</span>
+                <span><slot name="buyDate"></slot></span>
+            </div>
+            <div class="asset-cell asset-current-value">
+                <span class="cell-label">Wartość w dniu sprzedaży</span>
+                <span><slot name="saleValue"></slot></span>
+            </div>
+            <div class="asset-cell asset-current-value">
+                <span class="cell-label">Dzień sprzedaży</span>
+                <span><slot name="saleDate"></slot></span>
+            </div>
+        </div>
     </div>
 </template>

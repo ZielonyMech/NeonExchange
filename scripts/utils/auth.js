@@ -30,8 +30,9 @@ export async function createNewUser(email, password, currency) {
         password: hashedPassword,
         balance: 1000,
         ownedAssets: [],
+        transactionHistory: [],
         userCurrency: currency ?? 'PLN',
-        creationDate: new Date().toISOString()
+        creationDate: new Date().toISOString(),
     }
 }
 

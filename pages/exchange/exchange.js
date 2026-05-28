@@ -109,7 +109,7 @@ function clearDialogInputs() {
 }
 
 async function displayChartPopup(baseCurrency, selectedCurrency) {
-    clearDialogInputs();''
+    clearDialogInputs();
 
     const dialog = document.querySelector('#chartDialog');
     dialog.showModal();
