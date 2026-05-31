@@ -1,7 +1,10 @@
 import { getLoggedUser, syncLoggedUser, logoutCurrentUser } from '/scripts/globalState.js';
 import { APIgetCurrencyRates } from '/scripts/apiFacade.js';
+import { getTodayCurrencyPrice, getAssetTodayValue } from '/scripts/currency.js';
+import { createTransaction } from '/scripts/utils/types.js';
+import { formatRateToNumber, formatRateToString } from '/scripts/dataParser.js';
 
-window.addEventListener('load', async () => {
+window.addEventListener('DOMContentLoaded', async () => {
     const loggedUser = getLoggedUser();
     if (!loggedUser) {
         alert('Musisz być zalogowany, aby zobaczyć tę stronę!');
@@ -31,12 +34,14 @@ window.addEventListener('load', async () => {
 
 async function renderOwnedAssets(loggedUser) {
     const assetsContainer = document.querySelector('.assetsList');
-
+    
     let totalAssetValue = 0;
     let totalTodayDifference = 0;
     assetsContainer.innerHTML = '';
 
-    if (loggedUser.ownedAssets.length === 0) {
+    const currentAssets = loggedUser.transactions.filter(elem => !elem.sellDate);
+    
+    if (currentAssets.length === 0) {
         document.querySelector('.assetsList').innerHTML = '<p>Brak aktywów do wyświetlenia.</p>';
         return {
             totalAssetValue,
@@ -44,12 +49,12 @@ async function renderOwnedAssets(loggedUser) {
         }
     }
 
-    for (const asset of loggedUser.ownedAssets) {
-        const assetElement = await createAssetElement(asset);
+    for (const asset of currentAssets) {
+        const assetElement = await createTransactionElement(asset);
         assetsContainer.appendChild(assetElement);
 
-        const todayValue = Number((await getTodayCurrencyPrice(asset)).accountCurrencyValue) || 0;
-        const purchaseValue = Number(asset.quantity).toFixed(2);
+        const todayValue = getAssetTodayValue(asset);
+        const purchaseValue = formatRateToNumber(asset.boughtAmount);
 
         totalAssetValue += todayValue;
         totalTodayDifference += todayValue - purchaseValue;
@@ -66,13 +71,15 @@ async function renderTransactionHistory(loggedUser) {
 
     historyContainer.innerHTML = '';
 
-    if (loggedUser.transactionHistory.length === 0) {
+    const historyAssets = loggedUser.transactions.filter(elem => elem.sellDate);
+
+    if (historyAssets.length === 0) {
         historyContainer.innerHTML = '<p>Brak transakcji do wyświetlenia.</p>';
         return;
     }
 
-    for (const asset of loggedUser.transactionHistory) {
-        const historyElement = await createHistoryElement(asset);
+    for (const transaction of historyAssets) {
+        const historyElement = await createHistoryElement(transaction);
         historyContainer.appendChild(historyElement);
     }  
 }
@@ -88,7 +95,7 @@ async function renderUserData(loggedUser) {
     
     usernameElement.textContent = loggedUser.email;
     balanceElement.textContent = `${Number(loggedUser.balance).toFixed(2)} PLN`;
-    userCurrency.textContent = loggedUser.userCurrency;
+    userCurrency.textContent = loggedUser.baseCurrency;
     creationDateElement.textContent = new Date(loggedUser.creationDate).toLocaleDateString();
 
     await renderTransactionHistory(loggedUser);
@@ -98,9 +105,7 @@ async function renderUserData(loggedUser) {
     datePicker.setAttribute('min', loggedUser.creationDate.split('T')[0]);
     datePicker.value = datePicker.getAttribute('min');
 
-    const totalDifference = calculateTotalDifference(loggedUser, new Date(datePicker.value)) + totalTodayDifference;
-
-    console.log(totalTodayDifference);
+    const totalDifference = calculateTotalDifference(loggedUser, new Date(datePicker.value)) + Number(totalTodayDifference);
     
     totalBalanceElement.textContent = `${(Number(loggedUser.balance) + totalAssetValue).toFixed(2)} PLN`;
     dayStatusElement.textContent = `${totalDifference >= 0 ? '+' : ''}${totalDifference.toFixed(2)} PLN`;
@@ -108,36 +113,18 @@ async function renderUserData(loggedUser) {
     dayStatusElement.classList.toggle('negative', totalDifference < 0);
 }
 
-function calculateTotalDifference(loggedUser, minDate = null, maxDate = new Date().toISOString()) {
+function calculateTotalDifference(loggedUser, minDate = null) {
     if (!minDate) minDate = new Date(loggedUser.creationDate);
 
-    const filteredTransactions = loggedUser.transactionHistory.filter(transaction => {
-        const transactionDate = new Date(transaction.date);
-        return transactionDate >= minDate && transactionDate <= maxDate;
-    });
+    const filteredTransactions = loggedUser.transactions.filter(transaction => 
+        transaction.sellDate && new Date(transaction.sellDate) >= minDate
+    );
 
     const totalHistoryDifference = filteredTransactions.reduce((acc, transaction) => {
-        return acc + transaction.amount;
+        return acc + Number(transaction.netValue);
     }, 0);
 
     return totalHistoryDifference;
-}
-
-async function getTodayCurrencyPrice(asset) {
-    const loggedUser = getLoggedUser();
-    
-    const boughtCurrencyRate = await APIgetCurrencyRates(loggedUser.userCurrency);
-    const assetCurrencyRate = await APIgetCurrencyRates(asset.name);
-
-    const todayCurrencyRate = boughtCurrencyRate.ratesArr.find(elem => elem.code.toUpperCase() === asset.name.toUpperCase()).value;
-    const userCurrencyRate = assetCurrencyRate.ratesArr.find(elem => elem.code.toUpperCase() === loggedUser.userCurrency.toUpperCase()).value;
-    
-    const boughtCurrencyValue = (todayCurrencyRate * asset.quantity).toFixed(2);
-
-    return {
-        boughtCurrencyValue: Number(boughtCurrencyValue),
-        accountCurrencyValue: (userCurrencyRate * Number(boughtCurrencyValue)).toFixed(2)
-    };
 }
 
 function logout() {
@@ -146,33 +133,27 @@ function logout() {
     document.location.href = '/index.html';
 }
 
-async function sellAsset(asset) {
-    const todayPrice = await getTodayCurrencyPrice(asset);
+async function sellAsset(transaction) {
     const loggedUser = getLoggedUser();
 
     if (!loggedUser) {
         alert('Coś poszło nie tak...');
         return;
     }
+    
+    const todayAssetValue = Number(await getAssetTodayValue(transaction.asset, loggedUser.baseCurrency));
+    loggedUser.balance = Number(loggedUser.balance) + Number(todayAssetValue.toFixed(2));
 
-    loggedUser.balance += Number(todayPrice.accountCurrencyValue);
+    const transactionIndex = loggedUser.transactions.findIndex(elem => elem.id === transaction.id);
 
-    const soldAssetIndex = loggedUser.ownedAssets.findIndex(elem => 
-        elem.name === asset.name &&
-        elem.quantity === asset.quantity &&
-        elem.buyDate === asset.buyDate
-    );
-
-    if (soldAssetIndex !== -1) {
-        loggedUser.ownedAssets.splice(soldAssetIndex, 1);
+    if (transactionIndex === -1) {
+        alert('Coś poszło nie tak...');
+        return;
     }
 
-    loggedUser.transactionHistory.push({
-        type: 'sell',
-        asset: asset,
-        date: new Date().toISOString(),
-        amount: Number(todayPrice.boughtCurrencyValue)
-    });
+    const originalTransaction = loggedUser.transactions[transactionIndex];
+    originalTransaction.sellDate = new Date();
+    originalTransaction.netValue = formatRateToNumber(todayAssetValue - Number(transaction.asset.purchasePrice));
 
     alert('Udało się sprzedać aktywo!');
 
@@ -180,67 +161,62 @@ async function sellAsset(asset) {
     renderUserData(loggedUser);
 }
 
-async function createHistoryElement(asset) {
-    const template = document.querySelector('#historyCard');
-    const historyElement = template.content.cloneNode(true);
-
-    const nameElement = historyElement.querySelector('slot[name="name"]');
-    const quantityElement = historyElement.querySelector('slot[name="quantity"]');
-    const buyPriceElement = historyElement.querySelector('slot[name="buyPrice"]');
-    const saleValueElement = historyElement.querySelector('slot[name="saleValue"]');
-    const saleDateElement = historyElement.querySelector('slot[name="saleDate"]');
-    const buyDateElement = historyElement.querySelector('slot[name="buyDate"]');
-    const assetCardElement = historyElement.querySelector('.assetCard');
-
-    nameElement.textContent = asset.asset.name;
-    quantityElement.textContent = asset.asset.quantity;
-    buyPriceElement.textContent = `${Number(asset.asset.value).toFixed(2)} ${asset.asset.name}`;
-    saleValueElement.textContent = `${Number(asset.amount).toFixed(2)} ${asset.asset.name}`;
-    buyDateElement.textContent = new Date(asset.asset.buyDate).toLocaleDateString();
-    saleDateElement.textContent = new Date(asset.date).toLocaleDateString();
-
-    const profitLoss = (Number(asset.amount) - Number(asset.asset.value)).toFixed(2);
-    assetCardElement.classList.toggle('positive', Number(profitLoss) >= 0);
-    assetCardElement.classList.toggle('negative', Number(profitLoss) < 0);
-
-    return historyElement;
+async function createHistoryElement(transaction) {
+    return createAssetCard(transaction, true);
 }
  
-async function createAssetElement(asset) {
-    const template = document.querySelector('#assetCard');
-    const assetElement = template.content.cloneNode(true);
+async function createTransactionElement(transaction) {
+    return createAssetCard(transaction, false);
+}
 
+async function createAssetCard(transaction, isSold = false) {
+    const templateId = isSold ? '#historyCard' : '#assetCard';
+    const template = document.querySelector(templateId);
+    const assetElement = template.content.cloneNode(true);
+    
+    const asset = transaction.asset;
+    const loggedUser = getLoggedUser();
+    
     const nameElement = assetElement.querySelector('slot[name="name"]');
     const quantityElement = assetElement.querySelector('slot[name="quantity"]');
     const buyPriceElement = assetElement.querySelector('slot[name="buyPrice"]');
-    const currentValueElement = assetElement.querySelector('slot[name="currentValue"]');
-    const assetCompareDifference = assetElement.querySelector('slot[name="assetCompareDifference"]');
-    const buyDate = assetElement.querySelector('slot[name="buyDate"]');
+    const buyDateElement = assetElement.querySelector('slot[name="buyDate"]');
     const assetCardElement = assetElement.querySelector('.assetCard');
-    const sellButton = assetElement.querySelector('.sell-btn');
-
-    // const todayAssetValue = (await getTodayCurrencyPrice(asset)).accountCurrencyValue;
-    //temp
-    const todayAssetValue = 0;
-    const loggedUser = getLoggedUser();
-
-    const assetCurrencyRate = await APIgetCurrencyRates(asset.name);
-    const userCurrencyRate = assetCurrencyRate.ratesArr.find(elem => elem.code.toUpperCase() === loggedUser.userCurrency.toUpperCase()).value;
-
-    nameElement.textContent = asset.name;
-    quantityElement.textContent = asset.quantity;
-    buyPriceElement.textContent = `${Number(asset.value).toFixed(2)} ${asset.name}`;
-    currentValueElement.textContent = `${(Number(asset.value) * userCurrencyRate).toFixed(2)} ${loggedUser.userCurrency}`;
-    buyDate.textContent = new Date(asset.buyDate).toLocaleDateString();
-
-    const difference = ((Number(asset.value) * userCurrencyRate) - asset.quantity).toFixed(2);
-
-    assetCompareDifference.textContent = `${difference >= 0 ? '+' : ''}${difference} ${loggedUser.userCurrency}`;
-    assetCardElement.classList.toggle('positive', Number(difference) >= 0);
-    assetCardElement.classList.toggle('negative', Number(difference) < 0);
-
-    sellButton.addEventListener('click', () => sellAsset(asset));
-
+    
+    nameElement.textContent = asset.boughtCurrencyName;
+    buyDateElement.textContent = transaction.buyDate ? new Date(transaction.buyDate).toLocaleDateString() : 'N/A';
+    
+    if (isSold) {
+        const saleValueElement = assetElement.querySelector('slot[name="saleValue"]');
+        const saleDateElement = assetElement.querySelector('slot[name="saleDate"]');
+        
+        quantityElement.textContent = `${formatRateToString(asset.boughtAmount)} ${asset.boughtCurrencyName}`;
+        buyPriceElement.textContent = `${formatRateToString(asset.purchasePrice)} ${asset.baseCurrency}`;
+        saleValueElement.textContent = `${formatRateToString(Number(transaction.netValue) + asset.purchasePrice)} ${asset.baseCurrency}`;
+        saleDateElement.textContent = transaction.sellDate ? new Date(transaction.sellDate).toLocaleDateString() : 'N/A';
+        
+        const profitLoss = formatRateToNumber(transaction.netValue - asset.purchasePrice);
+        assetCardElement.classList.toggle('positive', profitLoss >= 0);
+        assetCardElement.classList.toggle('negative', profitLoss < 0);
+    } else {
+        const currentValueElement = assetElement.querySelector('slot[name="currentValue"]');
+        const assetCompareDifference = assetElement.querySelector('slot[name="assetCompareDifference"]');
+        const sellButton = assetElement.querySelector('.sell-btn');
+        
+        const assetTodayValue = await getAssetTodayValue(asset, loggedUser.baseCurrency);
+        
+        quantityElement.textContent = `${formatRateToString(asset.boughtAmount)} ${asset.boughtCurrencyName}`;
+        buyPriceElement.textContent = `${formatRateToString(asset.purchasePrice)} ${asset.baseCurrency}`;
+        currentValueElement.textContent = `${formatRateToString(assetTodayValue)} ${asset.baseCurrency}`;
+        
+        const netValue = assetTodayValue - asset.purchasePrice;
+        assetCompareDifference.textContent = `${netValue >= 0 ? '+' : ''}${formatRateToString(netValue)} ${asset.baseCurrency}`;
+        assetCardElement.classList.toggle('positive', netValue >= 0);
+        assetCardElement.classList.toggle('negative', netValue < 0);
+        
+        sellButton.addEventListener('click', () => sellAsset(transaction));
+    }
+    
     return assetElement;
 }
 

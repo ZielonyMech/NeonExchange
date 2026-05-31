@@ -26,10 +26,8 @@ async function register(event) {
 
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('.register-form');
-    if (form) {
-        form.addEventListener('submit', register);
-    }
-
+    form.addEventListener('submit', register);
+    
     const currencySelect = document.querySelector('#currencySelect');
 
     for (const currency of config.supportedCurrencies) {
@@ -41,7 +39,3 @@ document.addEventListener('DOMContentLoaded', () => {
         currencySelect.add(option);
     }
 });
-
-function createOption(currencyCode) {
-
-}
