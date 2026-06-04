@@ -25,3 +25,26 @@ export async function getAssetTodayValue(asset, baseCurrency) {
 
     return formatRateToNumber(asset.boughtAmount * todayRates.baseCurrencyRate);   
 }
+
+export function calculateHistoryDifference(loggedUser, minDate = null) {
+    if (!minDate) minDate = new Date(loggedUser.creationDate);
+
+    const filteredTransactions = loggedUser.transactions.filter(transaction => 
+        transaction.sellDate && new Date(transaction.sellDate) >= minDate
+    );
+
+    const totalHistoryDifference = filteredTransactions.reduce((acc, transaction) => {
+        return acc + Number(transaction.netValue);
+    }, 0);
+
+    return totalHistoryDifference;
+}
+
+export async function calculateTodayDifference(loggedUser) {
+    const ownedAssets = loggedUser.transactions.filter(transaction => !transaction.sellDate);
+    const totalTodayNet = ownedAssets.reduce((acc, asset) => {
+        return acc + Number(getAssetTodayValue(asset));
+    }, 0);
+
+    return totalTodayNet;
+}

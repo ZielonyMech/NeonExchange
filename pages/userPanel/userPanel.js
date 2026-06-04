@@ -1,6 +1,6 @@
 import { getLoggedUser, syncLoggedUser, logoutCurrentUser } from '/scripts/globalState.js';
 import { APIgetCurrencyRates } from '/scripts/apiFacade.js';
-import { getTodayCurrencyPrice, getAssetTodayValue } from '/scripts/currency.js';
+import { getTodayCurrencyPrice, getAssetTodayValue, calculateHistoryDifference, calculateTodayDifference } from '/scripts/currency.js';
 import { createTransaction } from '/scripts/utils/types.js';
 import { formatRateToNumber, formatRateToString } from '/scripts/dataParser.js';
 
@@ -29,24 +29,29 @@ window.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
+    document.querySelector('#add-funds').addEventListener('click', async () => {
+        loggedUser.balance = Number(loggedUser.balance) + 100;
+        syncLoggedUser(loggedUser);
+        await renderUserData(loggedUser);
+    })
+
+    document.querySelector('#startDate').addEventListener('change', async (e) => {
+        const selectedDate = e.target.value;
+        await renderUserData(loggedUser);
+    });
+
     await renderUserData(loggedUser);
 });
 
 async function renderOwnedAssets(loggedUser) {
     const assetsContainer = document.querySelector('.assetsList');
-    
-    let totalAssetValue = 0;
-    let totalTodayDifference = 0;
     assetsContainer.innerHTML = '';
 
     const currentAssets = loggedUser.transactions.filter(elem => !elem.sellDate);
     
     if (currentAssets.length === 0) {
-        document.querySelector('.assetsList').innerHTML = '<p>Brak aktywów do wyświetlenia.</p>';
-        return {
-            totalAssetValue,
-            totalTodayDifference
-        }
+        assetsContainer.innerHTML = '<p>Brak aktywów do wyświetlenia.</p>';
+        return
     }
 
     for (const asset of currentAssets) {
@@ -55,15 +60,7 @@ async function renderOwnedAssets(loggedUser) {
 
         const todayValue = getAssetTodayValue(asset);
         const purchaseValue = formatRateToNumber(asset.boughtAmount);
-
-        totalAssetValue += todayValue;
-        totalTodayDifference += todayValue - purchaseValue;
     }  
-
-    return {
-        totalAssetValue,
-        totalTodayDifference
-    }
 }
 
 async function renderTransactionHistory(loggedUser) {
@@ -99,32 +96,22 @@ async function renderUserData(loggedUser) {
     creationDateElement.textContent = new Date(loggedUser.creationDate).toLocaleDateString();
 
     await renderTransactionHistory(loggedUser);
-    const { totalAssetValue, totalTodayDifference } = await renderOwnedAssets(loggedUser);
+    await renderOwnedAssets(loggedUser);
     
     datePicker.setAttribute('max', new Date().toISOString().split('T')[0]);
     datePicker.setAttribute('min', loggedUser.creationDate.split('T')[0]);
-    datePicker.value = datePicker.getAttribute('min');
 
-    const totalDifference = calculateTotalDifference(loggedUser, new Date(datePicker.value)) + Number(totalTodayDifference);
+    if (!datePicker.value) datePicker.value = datePicker.getAttribute('min');
     
-    totalBalanceElement.textContent = `${(Number(loggedUser.balance) + totalAssetValue).toFixed(2)} PLN`;
+    const historyNetValue = calculateHistoryDifference(loggedUser, new Date(datePicker.value));
+    const todayNetValue = await calculateTodayDifference(loggedUser);
+
+    const totalDifference = historyNetValue + todayNetValue;
+
+    totalBalanceElement.textContent = `${(Number(loggedUser.balance) + todayNetValue).toFixed(2)} PLN`;
     dayStatusElement.textContent = `${totalDifference >= 0 ? '+' : ''}${totalDifference.toFixed(2)} PLN`;
     dayStatusElement.classList.toggle('positive', totalDifference >= 0);
     dayStatusElement.classList.toggle('negative', totalDifference < 0);
-}
-
-function calculateTotalDifference(loggedUser, minDate = null) {
-    if (!minDate) minDate = new Date(loggedUser.creationDate);
-
-    const filteredTransactions = loggedUser.transactions.filter(transaction => 
-        transaction.sellDate && new Date(transaction.sellDate) >= minDate
-    );
-
-    const totalHistoryDifference = filteredTransactions.reduce((acc, transaction) => {
-        return acc + Number(transaction.netValue);
-    }, 0);
-
-    return totalHistoryDifference;
 }
 
 function logout() {
@@ -219,7 +206,3 @@ async function createAssetCard(transaction, isSold = false) {
     
     return assetElement;
 }
-
-document.querySelector('#startDate').addEventListener('change', (e) => {
-    const selectedDate = e.target.value;
-});

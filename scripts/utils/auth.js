@@ -6,6 +6,21 @@ export async function hashSomething(text, algorithm) {
     return Array.from(new Uint8Array(hashedValue)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+export function checkPasswordStrength(password) {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasDigit = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    return password.length >= minLength && hasUpperCase && hasLowerCase && hasDigit && hasSpecialChar;
+}
+
+export function checkEmailValidity(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
 export function getUser(userMail) {
     const savedUsers = getAllUsers();
     const foundUser = savedUsers.find(u => u.email === userMail);
