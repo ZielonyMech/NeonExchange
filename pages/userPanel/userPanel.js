@@ -1,8 +1,15 @@
 import { getLoggedUser, syncLoggedUser, logoutCurrentUser } from '/scripts/globalState.js';
 import { APIgetCurrencyRates } from '/scripts/apiFacade.js';
-import { getTodayCurrencyPrice, getAssetTodayValue, calculateHistoryDifference, calculateTodayDifference } from '/scripts/currency.js';
+import { getTodayCurrencyPrice, getAssetTodayValue, calculateHistoryNetValue, calculateTodayNetValue } from '/scripts/currency.js';
 import { createTransaction } from '/scripts/utils/types.js';
 import { formatRateToNumber, formatRateToString } from '/scripts/dataParser.js';
+
+const windowSize = 2; // tu bd jakiś rozmiar okna
+
+let availableTabs = {
+    'current-positions': { currentPage: 1, totalPages: 1 },
+    'history': { currentPage: 1, totalPages: 1 }
+};
 
 window.addEventListener('DOMContentLoaded', async () => {
     const loggedUser = getLoggedUser();
@@ -16,7 +23,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     
     const tabButtons = document.querySelectorAll('.tab-button');
     tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', async () => {
             tabButtons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
             
@@ -25,60 +32,99 @@ window.addEventListener('DOMContentLoaded', async () => {
                 content.classList.remove('active');
             });
 
-            document.getElementById(tabId).classList.add('active');
+            const currentTab = document.getElementById(tabId);
+            currentTab.classList.add('active');
+
+            await renderPaginationContent(tabId);
         });
     });
 
     document.querySelector('#add-funds').addEventListener('click', async () => {
+        const loggedUser = getLoggedUser()
+
         loggedUser.balance = Number(loggedUser.balance) + 100;
+
         syncLoggedUser(loggedUser);
         await renderUserData(loggedUser);
     })
 
     document.querySelector('#startDate').addEventListener('change', async (e) => {
         const selectedDate = e.target.value;
-        await renderUserData(loggedUser);
+        await renderUserData(getLoggedUser());
+    });
+
+    document.querySelector('#pagination-element-count').addEventListener('change', async (e) => {
+        const activeTab = document.querySelector('.tab-content.active');
+        updateUserTransactions(getLoggedUser(), true);
+        await renderPaginationContent(activeTab.id);
     });
 
     await renderUserData(loggedUser);
 });
 
+const getPaginationSize = () => Number(document.querySelector('#pagination-element-count').value);
+
+function updateUserTransactions(loggedUser, initial = false) {
+    const paginationSize = getPaginationSize();
+
+    const historyTransactions = loggedUser.transactions.filter(elem => elem.sellDate);
+    const currentTransactions = loggedUser.transactions.filter(elem => !elem.sellDate);
+
+    availableTabs['current-positions'].totalPages = Math.ceil(currentTransactions.length / paginationSize);
+    availableTabs['history'].totalPages = Math.ceil(historyTransactions.length / paginationSize);
+
+    if (initial) {
+        availableTabs['current-positions'].currentPage = 1;
+        availableTabs['history'].currentPage = 1;
+    }
+
+    return { historyTransactions, currentTransactions };
+}
+
+function paginateTransactions(transactions, currentPage) {
+    const startIndex = (currentPage - 1) * getPaginationSize();
+    const endIndex = startIndex + getPaginationSize();
+    return transactions.slice(startIndex, endIndex);
+}
+
 async function renderOwnedAssets(loggedUser) {
     const assetsContainer = document.querySelector('.assetsList');
     assetsContainer.innerHTML = '';
 
-    const currentAssets = loggedUser.transactions.filter(elem => !elem.sellDate);
+    const currentTransactions = loggedUser.transactions.filter(elem => !elem.sellDate);
     
-    if (currentAssets.length === 0) {
+    if (currentTransactions.length === 0) {
         assetsContainer.innerHTML = '<p>Brak aktywów do wyświetlenia.</p>';
-        return
+        return;
     }
 
-    for (const asset of currentAssets) {
-        const assetElement = await createTransactionElement(asset);
-        assetsContainer.appendChild(assetElement);
+    const tabConfig = availableTabs['current-positions'];
+    const paginatedAssets = paginateTransactions(currentTransactions, tabConfig.currentPage);
 
-        const todayValue = getAssetTodayValue(asset);
-        const purchaseValue = formatRateToNumber(asset.boughtAmount);
-    }  
+    for (const asset of paginatedAssets) {
+        const assetElement = await createAssetCard(asset, false);
+        assetsContainer.appendChild(assetElement);
+    }
 }
 
 async function renderTransactionHistory(loggedUser) {
     const historyContainer = document.querySelector('.historyList');
-
     historyContainer.innerHTML = '';
 
-    const historyAssets = loggedUser.transactions.filter(elem => elem.sellDate);
+    const historyTransactions = loggedUser.transactions.filter(elem => elem.sellDate);
 
-    if (historyAssets.length === 0) {
+    if (historyTransactions.length === 0) {
         historyContainer.innerHTML = '<p>Brak transakcji do wyświetlenia.</p>';
         return;
     }
 
-    for (const transaction of historyAssets) {
-        const historyElement = await createHistoryElement(transaction);
+    const tabConfig = availableTabs['history'];
+    const paginatedHistory = paginateTransactions(historyTransactions, tabConfig.currentPage);
+
+    for (const transaction of paginatedHistory) {
+        const historyElement = await createAssetCard(transaction, true);
         historyContainer.appendChild(historyElement);
-    }  
+    }
 }
 
 async function renderUserData(loggedUser) {
@@ -95,16 +141,18 @@ async function renderUserData(loggedUser) {
     userCurrency.textContent = loggedUser.baseCurrency;
     creationDateElement.textContent = new Date(loggedUser.creationDate).toLocaleDateString();
 
-    await renderTransactionHistory(loggedUser);
-    await renderOwnedAssets(loggedUser);
+    updateUserTransactions(loggedUser);
+    
+    const activeTab = document.querySelector('.tab-content.active');
+    await renderPaginationContent(activeTab.id);
     
     datePicker.setAttribute('max', new Date().toISOString().split('T')[0]);
     datePicker.setAttribute('min', loggedUser.creationDate.split('T')[0]);
 
     if (!datePicker.value) datePicker.value = datePicker.getAttribute('min');
     
-    const historyNetValue = calculateHistoryDifference(loggedUser, new Date(datePicker.value));
-    const todayNetValue = await calculateTodayDifference(loggedUser);
+    const historyNetValue = calculateHistoryNetValue(loggedUser, new Date(datePicker.value));
+    const todayNetValue = await calculateTodayNetValue(loggedUser);
 
     const totalDifference = historyNetValue + todayNetValue;
 
@@ -146,14 +194,6 @@ async function sellAsset(transaction) {
 
     syncLoggedUser(loggedUser);
     renderUserData(loggedUser);
-}
-
-async function createHistoryElement(transaction) {
-    return createAssetCard(transaction, true);
-}
- 
-async function createTransactionElement(transaction) {
-    return createAssetCard(transaction, false);
 }
 
 async function createAssetCard(transaction, isSold = false) {
@@ -205,4 +245,75 @@ async function createAssetCard(transaction, isSold = false) {
     }
     
     return assetElement;
+}
+
+async function renderPaginationContent(tabId) {
+    const loggedUser = getLoggedUser();
+
+    updateUserTransactions(loggedUser);
+
+    if (tabId === 'current-positions') {
+        await renderOwnedAssets(loggedUser);
+    } else {
+        await renderTransactionHistory(loggedUser);
+    }
+    
+    const paginationContainer = document.querySelector('#pagination');
+    paginationContainer.innerHTML = '';
+
+    const tabConfig = availableTabs[tabId];
+    const { currentPage, totalPages } = tabConfig;
+
+    if (totalPages <= 1) return; 
+
+    const changePage = async (pageNum) => {
+        tabConfig.currentPage = pageNum;
+        await renderPaginationContent(tabId);
+    };
+
+    const addButton = (text, pageNum, isActive = false, isDisabled = false) => {
+        const button = document.createElement('button');
+        button.textContent = text;
+        button.disabled = isDisabled || isActive;
+        
+        if (isActive) button.classList.add('active');
+        if (!isDisabled && !isActive) button.addEventListener('click', () => changePage(pageNum));
+        
+        return button;
+    };
+
+    if (currentPage > 1) paginationContainer.appendChild(addButton('«', currentPage - 1));
+
+    const startPage = Math.max(1, currentPage - windowSize);
+    const endPage = Math.min(totalPages, currentPage + windowSize);
+
+    if (startPage > 1) {
+        paginationContainer.appendChild(addButton('1', 1, currentPage === 1));
+        if (startPage > 2) {
+            const span = document.createElement('span');
+            span.textContent = '...';
+            paginationContainer.appendChild(span);
+        }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        paginationContainer.appendChild(addButton(i, i, currentPage === i));
+    }
+
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            const span = document.createElement('span');
+            span.textContent = '...';
+            paginationContainer.appendChild(span);
+        }
+        paginationContainer.appendChild(addButton(totalPages, totalPages, currentPage === totalPages));
+    }
+
+    if (currentPage < totalPages) paginationContainer.appendChild(addButton('»', currentPage + 1));
+
+    if (currentPage > totalPages) changePage(currentPage - 1);
+}
+
+function renderPagintaionButtons() {
+
 }

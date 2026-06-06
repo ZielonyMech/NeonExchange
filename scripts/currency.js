@@ -23,10 +23,10 @@ export async function getAssetTodayValue(asset, baseCurrency) {
 
     const todayRates = await getTodayCurrencyPrice(asset, baseCurrency);
 
-    return formatRateToNumber(asset.boughtAmount * todayRates.baseCurrencyRate);   
+    return formatRateToNumber(asset.boughtAmount * Number(todayRates.baseCurrencyRate));   
 }
 
-export function calculateHistoryDifference(loggedUser, minDate = null) {
+export function calculateHistoryNetValue(loggedUser, minDate = null) {
     if (!minDate) minDate = new Date(loggedUser.creationDate);
 
     const filteredTransactions = loggedUser.transactions.filter(transaction => 
@@ -40,11 +40,18 @@ export function calculateHistoryDifference(loggedUser, minDate = null) {
     return totalHistoryDifference;
 }
 
-export async function calculateTodayDifference(loggedUser) {
-    const ownedAssets = loggedUser.transactions.filter(transaction => !transaction.sellDate);
-    const totalTodayNet = ownedAssets.reduce((acc, asset) => {
-        return acc + Number(getAssetTodayValue(asset));
-    }, 0);
+export async function calculateTodayNetValue(loggedUser) {
+    const currentTransactions = loggedUser.transactions.filter(
+        transaction => !transaction.sellDate
+    );
 
-    return totalTodayNet;
+    const values = await Promise.all(
+        currentTransactions.map(async (transaction) => {
+            const todayValue = await getAssetTodayValue(transaction.asset, loggedUser.baseCurrency);
+            return transaction.asset.purchasePrice - todayValue;
+        })
+    );
+
+    const totalTodayNet = values.reduce((acc, value) => acc + Number(value), 0);
+    return totalTodayNet;   
 }
