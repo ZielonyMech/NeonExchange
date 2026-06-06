@@ -7,6 +7,8 @@ var chart = null;
 let selectedPoint = null;
 
 export async function renderChart(baseCurrency, selectedCurrency, range, { onRateSelected } = {}) {
+    onRateSelected?.({value: null, date: null})
+
     if(chart) chart.destroy();
 
     let data = await withLoading(async () => APIgetCurrencyRatesRange(baseCurrency, range), ".loaderContainer");
@@ -28,6 +30,8 @@ export async function renderChart(baseCurrency, selectedCurrency, range, { onRat
         }]
     };
 
+    selectedPoint = chartData.datasets[0].data.length - 1;
+    
     chart = new Chart(ctx, {
         type: 'line',
         data: chartData,
@@ -36,18 +40,19 @@ export async function renderChart(baseCurrency, selectedCurrency, range, { onRat
                 if (elements.length > 0) {
                     const dataIndex = elements[0].index;
                     const datasetIndex = elements[0].datasetIndex;
-                    const value = chart.data.datasets[datasetIndex].data[dataIndex];
+                    
+                    const exchangeValue = chart.data.datasets[datasetIndex].data[dataIndex];
+                    const exchangeDate = chart.data.labels[dataIndex];
                     
                     selectedPoint = dataIndex;
-                    onRateSelected?.(value);
+                    onRateSelected?.({value: exchangeValue, date: exchangeDate});
                     
                     chart.update();
                 }
-        },
+            },
         }
     });
 
-    selectedPoint = data.length - 1;
     const lastRate = data[selectedPoint].ratesArr.find(r => r.code === selectedCurrency);
-    onRateSelected?.(lastRate ? lastRate.value : null);
+    onRateSelected?.({value: lastRate ? lastRate.value : null, date: data[selectedPoint].date});
 }

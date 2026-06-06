@@ -1,7 +1,17 @@
 import { getLoggedUser, syncLoggedUser, logoutCurrentUser } from '/scripts/globalState.js';
 import { APIgetCurrencyRates } from '/scripts/apiFacade.js';
+import { getTodayCurrencyPrice, getAssetTodayValue, calculateHistoryNetValue, calculateTodayNetValue } from '/scripts/currency.js';
+import { createTransaction } from '/scripts/utils/types.js';
+import { formatRateToNumber, formatRateToString } from '/scripts/dataParser.js';
 
-window.addEventListener('load', async () => {
+const windowSize = 2; // tu bd jakiś rozmiar okna
+
+let availableTabs = {
+    'current-positions': { currentPage: 1, totalPages: 1 },
+    'history': { currentPage: 1, totalPages: 1 }
+};
+
+window.addEventListener('DOMContentLoaded', async () => {
     const loggedUser = getLoggedUser();
     if (!loggedUser) {
         alert('Musisz być zalogowany, aby zobaczyć tę stronę!');
@@ -11,10 +21,9 @@ window.addEventListener('load', async () => {
 
     document.querySelector('#logout').addEventListener('click', logout);
     
-    // Tab switching
     const tabButtons = document.querySelectorAll('.tab-button');
     tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', async () => {
             tabButtons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
             
@@ -22,56 +31,135 @@ window.addEventListener('load', async () => {
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
             });
-            document.getElementById(tabId).classList.add('active');
+
+            const currentTab = document.getElementById(tabId);
+            currentTab.classList.add('active');
+
+            await renderPaginationContent(tabId);
         });
     });
 
-    await renderOwnedAssets(loggedUser);
+    document.querySelector('#add-funds').addEventListener('click', async () => {
+        const loggedUser = getLoggedUser()
+
+        loggedUser.balance = Number(loggedUser.balance) + 100;
+
+        syncLoggedUser(loggedUser);
+        await renderUserData(loggedUser);
+    })
+
+    document.querySelector('#startDate').addEventListener('change', async (e) => {
+        const selectedDate = e.target.value;
+        await renderUserData(getLoggedUser());
+    });
+
+    document.querySelector('#pagination-element-count').addEventListener('change', async (e) => {
+        const activeTab = document.querySelector('.tab-content.active');
+        updateUserTransactions(getLoggedUser(), true);
+        await renderPaginationContent(activeTab.id);
+    });
+
+    await renderUserData(loggedUser);
 });
 
+const getPaginationSize = () => Number(document.querySelector('#pagination-element-count').value);
+
+function updateUserTransactions(loggedUser, initial = false) {
+    const paginationSize = getPaginationSize();
+
+    const historyTransactions = loggedUser.transactions.filter(elem => elem.sellDate);
+    const currentTransactions = loggedUser.transactions.filter(elem => !elem.sellDate);
+
+    availableTabs['current-positions'].totalPages = Math.ceil(currentTransactions.length / paginationSize);
+    availableTabs['history'].totalPages = Math.ceil(historyTransactions.length / paginationSize);
+
+    if (initial) {
+        availableTabs['current-positions'].currentPage = 1;
+        availableTabs['history'].currentPage = 1;
+    }
+
+    return { historyTransactions, currentTransactions };
+}
+
+function paginateTransactions(transactions, currentPage) {
+    const startIndex = (currentPage - 1) * getPaginationSize();
+    const endIndex = startIndex + getPaginationSize();
+    return transactions.slice(startIndex, endIndex);
+}
+
 async function renderOwnedAssets(loggedUser) {
+    const assetsContainer = document.querySelector('.assetsList');
+    assetsContainer.innerHTML = '';
+
+    const currentTransactions = loggedUser.transactions.filter(elem => !elem.sellDate);
+    
+    if (currentTransactions.length === 0) {
+        assetsContainer.innerHTML = '<p>Brak aktywów do wyświetlenia.</p>';
+        return;
+    }
+
+    const tabConfig = availableTabs['current-positions'];
+    const paginatedAssets = paginateTransactions(currentTransactions, tabConfig.currentPage);
+
+    for (const asset of paginatedAssets) {
+        const assetElement = await createAssetCard(asset, false);
+        assetsContainer.appendChild(assetElement);
+    }
+}
+
+async function renderTransactionHistory(loggedUser) {
+    const historyContainer = document.querySelector('.historyList');
+    historyContainer.innerHTML = '';
+
+    const historyTransactions = loggedUser.transactions.filter(elem => elem.sellDate);
+
+    if (historyTransactions.length === 0) {
+        historyContainer.innerHTML = '<p>Brak transakcji do wyświetlenia.</p>';
+        return;
+    }
+
+    const tabConfig = availableTabs['history'];
+    const paginatedHistory = paginateTransactions(historyTransactions, tabConfig.currentPage);
+
+    for (const transaction of paginatedHistory) {
+        const historyElement = await createAssetCard(transaction, true);
+        historyContainer.appendChild(historyElement);
+    }
+}
+
+async function renderUserData(loggedUser) {
     const usernameElement = document.querySelector('#username');
     const balanceElement = document.querySelector('#balance');
     const userCurrency = document.querySelector('#userCurrency');
     const totalBalanceElement = document.querySelector('#totalBalance');
     const dayStatusElement = document.querySelector('#dayStatus');
-
+    const creationDateElement = document.querySelector('#creationDate');
+    const datePicker = document.querySelector('#startDate');
+    
     usernameElement.textContent = loggedUser.email;
     balanceElement.textContent = `${Number(loggedUser.balance).toFixed(2)} PLN`;
-    userCurrency.textContent = loggedUser.userCurrency;
+    userCurrency.textContent = loggedUser.baseCurrency;
+    creationDateElement.textContent = new Date(loggedUser.creationDate).toLocaleDateString();
 
-    const assetsContainer = document.querySelector('.assetsList');
+    updateUserTransactions(loggedUser);
+    
+    const activeTab = document.querySelector('.tab-content.active');
+    await renderPaginationContent(activeTab.id);
+    
+    datePicker.setAttribute('max', new Date().toISOString().split('T')[0]);
+    datePicker.setAttribute('min', loggedUser.creationDate.split('T')[0]);
 
-    let totalAssetValue = 0;
-    let totalDifference = 0;
+    if (!datePicker.value) datePicker.value = datePicker.getAttribute('min');
+    
+    const historyNetValue = calculateHistoryNetValue(loggedUser, new Date(datePicker.value));
+    const todayNetValue = await calculateTodayNetValue(loggedUser);
 
-    if (loggedUser.ownedAssets.length > 0) {
-        assetsContainer.innerHTML = '';
-        for (const asset of loggedUser.ownedAssets) {
-            const assetElement = await createAssetElement(asset);
-            assetsContainer.appendChild(assetElement);
+    const totalDifference = historyNetValue + todayNetValue;
 
-            const todayValue = Number(await getTodayCurrencyPrice(asset));
-            const purchaseValue = Number(asset.value) || 0;
-
-            totalAssetValue += todayValue;
-            totalDifference += todayValue - purchaseValue;
-        }
-    }
-
-    totalBalanceElement.textContent = `${(Number(loggedUser.balance) + totalAssetValue).toFixed(2)} PLN`;
+    totalBalanceElement.textContent = `${(Number(loggedUser.balance) + todayNetValue).toFixed(2)} PLN`;
     dayStatusElement.textContent = `${totalDifference >= 0 ? '+' : ''}${totalDifference.toFixed(2)} PLN`;
     dayStatusElement.classList.toggle('positive', totalDifference >= 0);
     dayStatusElement.classList.toggle('negative', totalDifference < 0);
-
-    drawAccountChart(loggedUser);
-}
-
-async function getTodayCurrencyPrice(asset) {
-    const rates = await APIgetCurrencyRates(asset.name);
-    const loggedUser = getLoggedUser();
-    const todayCurrencyRate = rates.ratesArr.find(elem => elem.code.toUpperCase() === loggedUser.userCurrency)?.value || 0;
-    return (todayCurrencyRate * asset.quantity).toFixed(2);
 }
 
 function logout() {
@@ -80,59 +168,152 @@ function logout() {
     document.location.href = '/index.html';
 }
 
-async function sellAsset(asset) {
-    const todayPrice = Number(await getTodayCurrencyPrice(asset));
+async function sellAsset(transaction) {
     const loggedUser = getLoggedUser();
 
     if (!loggedUser) {
         alert('Coś poszło nie tak...');
         return;
     }
+    
+    const todayAssetValue = Number(await getAssetTodayValue(transaction.asset, loggedUser.baseCurrency));
+    loggedUser.balance = Number(loggedUser.balance) + Number(todayAssetValue.toFixed(2));
 
-    loggedUser.balance += todayPrice;
+    const transactionIndex = loggedUser.transactions.findIndex(elem => elem.id === transaction.id);
 
-    const soldAssetIndex = loggedUser.ownedAssets.findIndex(elem => 
-        elem.name === asset.name &&
-        elem.quantity === asset.quantity &&
-        elem.buyDate === asset.buyDate
-    );
-
-    if (soldAssetIndex !== -1) {
-        loggedUser.ownedAssets.splice(soldAssetIndex, 1);
+    if (transactionIndex === -1) {
+        alert('Coś poszło nie tak...');
+        return;
     }
+
+    const originalTransaction = loggedUser.transactions[transactionIndex];
+    originalTransaction.sellDate = new Date();
+    originalTransaction.netValue = formatRateToNumber(todayAssetValue - Number(transaction.asset.purchasePrice));
 
     alert('Udało się sprzedać aktywo!');
 
     syncLoggedUser(loggedUser);
-    await renderOwnedAssets(loggedUser);
+    renderUserData(loggedUser);
 }
- 
-async function createAssetElement(asset) {
-    const template = document.querySelector('#assetCard');
-    const assetElement = template.content.cloneNode(true);
 
+async function createAssetCard(transaction, isSold = false) {
+    const templateId = isSold ? '#historyCard' : '#assetCard';
+    const template = document.querySelector(templateId);
+    const assetElement = template.content.cloneNode(true);
+    
+    const asset = transaction.asset;
+    const loggedUser = getLoggedUser();
+    
     const nameElement = assetElement.querySelector('slot[name="name"]');
     const quantityElement = assetElement.querySelector('slot[name="quantity"]');
     const buyPriceElement = assetElement.querySelector('slot[name="buyPrice"]');
-    const currentValueElement = assetElement.querySelector('slot[name="currentValue"]');
-    const assetCompareDifference = assetElement.querySelector('slot[name="assetCompareDifference"]');
+    const buyDateElement = assetElement.querySelector('slot[name="buyDate"]');
     const assetCardElement = assetElement.querySelector('.assetCard');
-    const sellButton = assetElement.querySelector('.sell-btn');
-
-    nameElement.textContent = asset.name;
-    quantityElement.textContent = asset.quantity;
-    buyPriceElement.textContent = `${Number(asset.value).toFixed(2)} PLN`;
-    currentValueElement.textContent = `${await getTodayCurrencyPrice(asset)} PLN`;
-
-    const todayPrice = Number(await getTodayCurrencyPrice(asset));
-    const buyPriceValue = Number(asset.value) || 0;
-    const difference = (todayPrice - buyPriceValue).toFixed(2);
-
-    assetCompareDifference.textContent = `${difference >= 0 ? '+' : ''}${difference} PLN`;
-    assetCardElement.classList.toggle('positive', Number(difference) >= 0);
-    assetCardElement.classList.toggle('negative', Number(difference) < 0);
-
-    sellButton.addEventListener('click', () => sellAsset(asset));
-
+    
+    nameElement.textContent = asset.boughtCurrencyName;
+    buyDateElement.textContent = transaction.buyDate ? new Date(transaction.buyDate).toLocaleDateString() : 'N/A';
+    
+    if (isSold) {
+        const saleValueElement = assetElement.querySelector('slot[name="saleValue"]');
+        const saleDateElement = assetElement.querySelector('slot[name="saleDate"]');
+        
+        quantityElement.textContent = `${formatRateToString(asset.boughtAmount)} ${asset.boughtCurrencyName}`;
+        buyPriceElement.textContent = `${formatRateToString(asset.purchasePrice)} ${asset.baseCurrency}`;
+        saleValueElement.textContent = `${formatRateToString(Number(transaction.netValue) + asset.purchasePrice)} ${asset.baseCurrency}`;
+        saleDateElement.textContent = transaction.sellDate ? new Date(transaction.sellDate).toLocaleDateString() : 'N/A';
+        
+        const profitLoss = formatRateToNumber(transaction.netValue - asset.purchasePrice);
+        assetCardElement.classList.toggle('positive', profitLoss >= 0);
+        assetCardElement.classList.toggle('negative', profitLoss < 0);
+    } else {
+        const currentValueElement = assetElement.querySelector('slot[name="currentValue"]');
+        const assetCompareDifference = assetElement.querySelector('slot[name="assetCompareDifference"]');
+        const sellButton = assetElement.querySelector('.sell-btn');
+        
+        const assetTodayValue = await getAssetTodayValue(asset, loggedUser.baseCurrency);
+        
+        quantityElement.textContent = `${formatRateToString(asset.boughtAmount)} ${asset.boughtCurrencyName}`;
+        buyPriceElement.textContent = `${formatRateToString(asset.purchasePrice)} ${asset.baseCurrency}`;
+        currentValueElement.textContent = `${formatRateToString(assetTodayValue)} ${asset.baseCurrency}`;
+        
+        const netValue = assetTodayValue - asset.purchasePrice;
+        assetCompareDifference.textContent = `${netValue >= 0 ? '+' : ''}${formatRateToString(netValue)} ${asset.baseCurrency}`;
+        assetCardElement.classList.toggle('positive', netValue >= 0);
+        assetCardElement.classList.toggle('negative', netValue < 0);
+        
+        sellButton.addEventListener('click', () => sellAsset(transaction));
+    }
+    
     return assetElement;
+}
+
+async function renderPaginationContent(tabId) {
+    const loggedUser = getLoggedUser();
+
+    updateUserTransactions(loggedUser);
+
+    if (tabId === 'current-positions') {
+        await renderOwnedAssets(loggedUser);
+    } else {
+        await renderTransactionHistory(loggedUser);
+    }
+    
+    const paginationContainer = document.querySelector('#pagination');
+    paginationContainer.innerHTML = '';
+
+    const tabConfig = availableTabs[tabId];
+    const { currentPage, totalPages } = tabConfig;
+
+    if (totalPages <= 1) return; 
+
+    const changePage = async (pageNum) => {
+        tabConfig.currentPage = pageNum;
+        await renderPaginationContent(tabId);
+    };
+
+    const addButton = (text, pageNum, isActive = false, isDisabled = false) => {
+        const button = document.createElement('button');
+        button.textContent = text;
+        button.disabled = isDisabled || isActive;
+        
+        if (isActive) button.classList.add('active');
+        if (!isDisabled && !isActive) button.addEventListener('click', () => changePage(pageNum));
+        
+        return button;
+    };
+
+    if (currentPage > 1) paginationContainer.appendChild(addButton('«', currentPage - 1));
+
+    const startPage = Math.max(1, currentPage - windowSize);
+    const endPage = Math.min(totalPages, currentPage + windowSize);
+
+    if (startPage > 1) {
+        paginationContainer.appendChild(addButton('1', 1, currentPage === 1));
+        if (startPage > 2) {
+            const span = document.createElement('span');
+            span.textContent = '...';
+            paginationContainer.appendChild(span);
+        }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        paginationContainer.appendChild(addButton(i, i, currentPage === i));
+    }
+
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            const span = document.createElement('span');
+            span.textContent = '...';
+            paginationContainer.appendChild(span);
+        }
+        paginationContainer.appendChild(addButton(totalPages, totalPages, currentPage === totalPages));
+    }
+
+    if (currentPage < totalPages) paginationContainer.appendChild(addButton('»', currentPage + 1));
+
+    if (currentPage > totalPages) changePage(currentPage - 1);
+}
+
+function renderPagintaionButtons() {
+
 }

@@ -1,4 +1,4 @@
-import { registerUser } from "/scripts/utils/auth.js"
+import { registerUser, checkEmailValidity, checkPasswordStrength } from "/scripts/utils/auth.js"
 import { config } from "/scripts/config/config.js"
 const crypto = window.crypto
 
@@ -9,6 +9,21 @@ async function register(event) {
     const password = document.querySelector('#password');
     const currency = document.querySelector('#currencySelect');
     const confirmPassword = document.querySelector('#confirmPassword');
+
+    if (!email.value || !password.value || !confirmPassword.value) {
+        alert('Proszę wypełnić wszystkie pola!');
+        return;
+    }
+
+    if (!checkEmailValidity(email.value)) {
+        alert('Nieprawidłowy format email!');
+        return;
+    }
+
+    if(!checkPasswordStrength(password.value)) {
+        alert('Hasło musi mieć co najmniej 8 znaków, zawierać małą literę, dużą literę, cyfrę i znak specjalny!');
+        return;
+    }
 
     if (password.value !== confirmPassword.value) {
         alert('Hasła nie są identyczne!');
@@ -26,10 +41,8 @@ async function register(event) {
 
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('.register-form');
-    if (form) {
-        form.addEventListener('submit', register);
-    }
-
+    form.addEventListener('submit', register);
+    
     const currencySelect = document.querySelector('#currencySelect');
 
     for (const currency of config.supportedCurrencies) {
@@ -41,7 +54,3 @@ document.addEventListener('DOMContentLoaded', () => {
         currencySelect.add(option);
     }
 });
-
-function createOption(currencyCode) {
-
-}

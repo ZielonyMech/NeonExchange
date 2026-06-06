@@ -34,6 +34,10 @@
                             <span class="info-label">Waluta</span>
                             <span id="userCurrency" class="info-value"></span>
                         </div>
+                        <div class="info-block">
+                            <span class="info-label">Data założenia konta</span>
+                            <span id="creationDate" class="info-value"></span>
+                        </div>
                     </div>
                     <button id="logout" class="btn logout-btn">Wyloguj się</button>
                 </article>
@@ -51,14 +55,14 @@
                             <span id="totalBalance" class="summary-number">0 PLN</span>
                         </div>
                         <div class="summary-row">
-                            <span class="summary-label">Status względem dnia</span>
-                            <span id="dayStatus" class="summary-number status positive">+0,00 PLN</span>
+                            <span class="summary-label">Status względem wybranego dnia</span>
+                            <span id="dayStatus" class="summary-number status positive">0,00 PLN</span>
                         </div>
                     </div>
                     <form class="chart-controls" aria-label="Kontrola wykresu">
                         <label for="startDate">Data początkowa</label>
                         <input type="date" id="startDate" name="startDate">
-                        <button type="button" class="btn add-funds">Dodaj środki</button>
+                        <button type="button" class="btn add-funds" id="add-funds">Dodaj środki</button>
                     </form>
                 </article>
             </div>
@@ -95,6 +99,14 @@
                         </div>
                     </div>
                 </div>
+                <div class="pagination-container">
+                    <ul class="pagination" id="pagination"></ul>
+                    <select id="pagination-element-count">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                    </select>
+                </div>
             </section>
         </section>
     </main>
@@ -116,6 +128,10 @@
                 <span class="cell-label">Wartość w dniu zakupu</span>
                 <span><slot name="buyPrice"></slot></span>
             </div>
+            <div class="asset-cell asset-buy-price">
+                <span class="cell-label">Data zakupu</span>
+                <span><slot name="buyDate"></slot></span>
+            </div>
             <div class="asset-cell asset-current-value">
                 <span class="cell-label">Wartość na dzisiaj</span>
                 <span><slot name="currentValue"></slot></span>
@@ -126,5 +142,36 @@
             </div>
         </div>
         <button class="btn sell-btn" type="button">Sprzedaj</button>
+    </div>
+</template>
+
+<template id="historyCard">
+    <div class="assetCard">
+        <div class="asset-row">
+            <div class="asset-cell asset-name">
+                <span class="cell-label">Sprzedane aktywo</span>
+                <span><slot name="name"></slot></span>
+            </div>
+            <div class="asset-cell asset-quantity">
+                <span class="cell-label">Ilość sprzedanego aktywa</span>
+                <span><slot name="quantity"></slot></span>
+            </div>
+            <div class="asset-cell asset-buy-price">
+                <span class="cell-label">Wartość w dniu zakupu</span>
+                <span><slot name="buyPrice"></slot></span>
+            </div>
+            <div class="asset-cell asset-buy-price">
+                <span class="cell-label">Data zakupu</span>
+                <span><slot name="buyDate"></slot></span>
+            </div>
+            <div class="asset-cell asset-current-value">
+                <span class="cell-label">Wartość w dniu sprzedaży</span>
+                <span><slot name="saleValue"></slot></span>
+            </div>
+            <div class="asset-cell asset-current-value">
+                <span class="cell-label">Dzień sprzedaży</span>
+                <span><slot name="saleDate"></slot></span>
+            </div>
+        </div>
     </div>
 </template>
