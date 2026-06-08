@@ -1,8 +1,8 @@
 import { getLoggedUser, syncLoggedUser, logoutCurrentUser } from '/scripts/globalState.js';
 import { APIgetCurrencyRates } from '/scripts/apiFacade.js';
-import { getTodayCurrencyPrice, getAssetTodayValue, calculateHistoryNetValue, calculateTodayNetValue } from '/scripts/currency.js';
+import { getTodayCurrencyPrice, getAssetTodayValue, calculateHistoryNetValue, calculateTodayNetValue, getHistoryDataByDate } from '/scripts/currency.js';
 import { createTransaction } from '/scripts/utils/types.js';
-import { formatRateToNumber, formatRateToString } from '/scripts/dataParser.js';
+import Chart from "https://cdn.jsdelivr.net/npm/chart.js@4.4.3/auto/+esm";
 
 const windowSize = 2; // tu bd jakiś rozmiar okna
 
@@ -155,11 +155,38 @@ async function renderUserData(loggedUser) {
     const todayNetValue = await calculateTodayNetValue(loggedUser);
 
     const totalDifference = historyNetValue + todayNetValue;
+    renderHistoryChart(getHistoryDataByDate(loggedUser, new Date(datePicker.value)));
 
     totalBalanceElement.textContent = `${(Number(loggedUser.balance) + todayNetValue).toFixed(2)} PLN`;
     dayStatusElement.textContent = `${totalDifference >= 0 ? '+' : ''}${totalDifference.toFixed(2)} PLN`;
     dayStatusElement.classList.toggle('positive', totalDifference >= 0);
     dayStatusElement.classList.toggle('negative', totalDifference < 0);
+}
+
+let chart = null
+
+function renderHistoryChart(historyNetValue) {
+    const chartContainer = document.querySelector('#history-chart');
+    
+    if(chart) chart.destroy();
+
+    chart = new Chart(chartContainer, {
+        type: 'line',
+        data: {
+            labels: historyNetValue.map(elem => elem.date),
+            datasets: [{
+                label: 'Wartość netto z historii transakcji',
+                data: historyNetValue.map(elem => elem.value),
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true
+        }
+    });
 }
 
 function logout() {
@@ -188,7 +215,7 @@ async function sellAsset(transaction) {
 
     const originalTransaction = loggedUser.transactions[transactionIndex];
     originalTransaction.sellDate = new Date();
-    originalTransaction.netValue = formatRateToNumber(todayAssetValue - Number(transaction.asset.purchasePrice));
+    originalTransaction.netValue = (todayAssetValue - Number(transaction.asset.purchasePrice)).toFixed(2);
 
     alert('Udało się sprzedać aktywo!');
 
@@ -217,12 +244,12 @@ async function createAssetCard(transaction, isSold = false) {
         const saleValueElement = assetElement.querySelector('slot[name="saleValue"]');
         const saleDateElement = assetElement.querySelector('slot[name="saleDate"]');
         
-        quantityElement.textContent = `${formatRateToString(asset.boughtAmount)} ${asset.boughtCurrencyName}`;
-        buyPriceElement.textContent = `${formatRateToString(asset.purchasePrice)} ${asset.baseCurrency}`;
-        saleValueElement.textContent = `${formatRateToString(Number(transaction.netValue) + asset.purchasePrice)} ${asset.baseCurrency}`;
+        quantityElement.textContent = `${asset.boughtAmount.toFixed(2)} ${asset.boughtCurrencyName}`;
+        buyPriceElement.textContent = `${asset.purchasePrice.toFixed(2)} ${asset.baseCurrency}`;
+        saleValueElement.textContent = `${(Number(transaction.netValue) + asset.purchasePrice).toFixed(2)} ${asset.baseCurrency}`;
         saleDateElement.textContent = transaction.sellDate ? new Date(transaction.sellDate).toLocaleDateString() : 'N/A';
         
-        const profitLoss = formatRateToNumber(transaction.netValue - asset.purchasePrice);
+        const profitLoss = (transaction.netValue - asset.purchasePrice).toFixed(2);
         assetCardElement.classList.toggle('positive', profitLoss >= 0);
         assetCardElement.classList.toggle('negative', profitLoss < 0);
     } else {
@@ -230,14 +257,14 @@ async function createAssetCard(transaction, isSold = false) {
         const assetCompareDifference = assetElement.querySelector('slot[name="assetCompareDifference"]');
         const sellButton = assetElement.querySelector('.sell-btn');
         
-        const assetTodayValue = await getAssetTodayValue(asset, loggedUser.baseCurrency);
+        const assetTodayValue = Number(await getAssetTodayValue(asset, loggedUser.baseCurrency));
         
-        quantityElement.textContent = `${formatRateToString(asset.boughtAmount)} ${asset.boughtCurrencyName}`;
-        buyPriceElement.textContent = `${formatRateToString(asset.purchasePrice)} ${asset.baseCurrency}`;
-        currentValueElement.textContent = `${formatRateToString(assetTodayValue)} ${asset.baseCurrency}`;
+        quantityElement.textContent = `${asset.boughtAmount.toFixed(2)} ${asset.boughtCurrencyName}`;
+        buyPriceElement.textContent = `${asset.purchasePrice.toFixed(2)} ${asset.baseCurrency}`;
+        currentValueElement.textContent = `${assetTodayValue.toFixed(2)} ${asset.baseCurrency}`;
         
         const netValue = assetTodayValue - asset.purchasePrice;
-        assetCompareDifference.textContent = `${netValue >= 0 ? '+' : ''}${formatRateToString(netValue)} ${asset.baseCurrency}`;
+        assetCompareDifference.textContent = `${netValue >= 0 ? '+' : ''}${netValue.toFixed(2)} ${asset.baseCurrency}`;
         assetCardElement.classList.toggle('positive', netValue >= 0);
         assetCardElement.classList.toggle('negative', netValue < 0);
         
