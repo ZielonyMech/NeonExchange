@@ -5,6 +5,11 @@ body {
   min-height: 100vh;
   margin: 0;
   box-sizing: border-box;
+  font-family: 'Lato', sans-serif;
+}
+
+input, button, select, textarea {
+  font-family: inherit;
 }
 
 app-header, main, footer {
@@ -31,9 +36,4 @@ main {
 
 footer {
     width: 100%;
-    padding: 8px 0;
-    background-color: #f1f1f1;
-    color: #333;
-    margin-top: 20px;
-    box-shadow: inset 0 1px 0 rgba(0,0,0,0.05);
 }

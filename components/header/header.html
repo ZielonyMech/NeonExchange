@@ -1,10 +1,10 @@
 <template id="app-header-template">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Crete+Round:ital@0;1&family=Jost:ital,wght@0,100..900;1,100..900&family=Pacifico&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Jost:ital,wght@0,100..900;1,100..900&family=Pacifico&display=swap');
 
         :host {
             display: block;
-            font-family: 'Crete Round', serif;
+            font-family: 'Lato', sans-serif;
         }
 
         .header {
@@ -116,8 +116,8 @@
 
     <header class="header">
         <div class="header-inner">
-            <div class="brand"><slot name="brand">NeonExchange🔄</slot></div>
-            <button class="hamburger" id="hamburger" aria-label="Przełącz menu" aria-expanded="false">
+            <div class="brand"><slot name="brand">NeonExchange<span aria-hidden="true">🔄</span></slot></div>
+            <button class="hamburger" id="hamburger" aria-expanded="false">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -125,10 +125,9 @@
             <nav class="nav-menu" id="navMenu" aria-label="Główna nawigacja">
                 <slot name="nav">
                     <ul>
-                        <li><a href="/index.html">Strona główna</a></li>
-                        <li><a href="/pages/exchange/exchange.html">Usługi</a></li>
-                        <li><a href="#contact">Kontakt</a></li>
-                        <li><a id="loginLink" href="/pages/auth/login/login.html">Logowanie</a></li>
+                        <li><a aria-label="przejdź do strony głównej" href="/index.html"> Strona główna</a></li>
+                        <li><a aria-label="przejdź do usług" href="/pages/exchange/exchange.html">Usługi</a></li>
+                        <li><a aria-label="zaloguj się" id="loginLink" href="/pages/auth/login/login.html">Logowanie</a></li>
                     </ul>
                 </slot>
             </nav>
