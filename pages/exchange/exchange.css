@@ -3,7 +3,6 @@
 body {
     background: #000;
     color: #fff;
-    font-family: 'Crete Round', serif;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -435,32 +434,6 @@ label, .infoLabel, .resultLabel, .inputGroup span, .inputGroup p {
     transform: translateY(-1px);
 }
 
-footer {
-    background: #000;
-    color: #dfdfdf;
-}
-
-footer .footer-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 15px 20px;
-    text-align: center;
-}
-
-footer p {
-    margin: 4px 0;
-    font-size: 0.8rem;
-}
-
-footer a {
-    color: #ffffff;
-    text-decoration: none;
-    font-weight: 600;
-}
-
-footer a:hover {
-    text-decoration: underline;
-}
 
 /* Ekrany małe */
 @media (max-width: 768px) {

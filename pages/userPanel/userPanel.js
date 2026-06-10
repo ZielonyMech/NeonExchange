@@ -1,10 +1,11 @@
 import { getLoggedUser, syncLoggedUser, logoutCurrentUser } from '/scripts/globalState.js';
+import { showToast } from '/styles/popups/popup.js';
 import { APIgetCurrencyRates } from '/scripts/apiFacade.js';
 import { getTodayCurrencyPrice, getAssetTodayValue, calculateHistoryNetValue, calculateTodayNetValue } from '/scripts/currency.js';
 import { createTransaction } from '/scripts/utils/types.js';
 import { formatRateToNumber, formatRateToString } from '/scripts/dataParser.js';
 
-const windowSize = 2; // tu bd jakiś rozmiar okna
+const getWindowSize = () => window.innerWidth >= 960 ? 5 : window.innerWidth >= 600 ? 2 : 1;
 
 let availableTabs = {
     'current-positions': { currentPage: 1, totalPages: 1 },
@@ -14,8 +15,8 @@ let availableTabs = {
 window.addEventListener('DOMContentLoaded', async () => {
     const loggedUser = getLoggedUser();
     if (!loggedUser) {
-        alert('Musisz być zalogowany, aby zobaczyć tę stronę!');
-        document.location.href = '/pages/auth/login/login.html';
+        showToast('Musisz być zalogowany, aby zobaczyć tę stronę!', 'error');
+        setTimeout(() => { document.location.href = '/pages/auth/login/login.html'; }, 1500);
         return;
     }
 
@@ -40,11 +41,12 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
 
     document.querySelector('#add-funds').addEventListener('click', async () => {
-        const loggedUser = getLoggedUser()
+        const loggedUser = getLoggedUser();
 
         loggedUser.balance = Number(loggedUser.balance) + 100;
 
         syncLoggedUser(loggedUser);
+        showToast('Dodano 100 PLN do salda!', 'success');
         await renderUserData(loggedUser);
     })
 
@@ -60,6 +62,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
 
     await renderUserData(loggedUser);
+
+    window.addEventListener('resize', async () => {
+        const activeTab = document.querySelector('.tab-content.active');
+        await renderPaginationContent(activeTab.id);
+    });
 });
 
 const getPaginationSize = () => Number(document.querySelector('#pagination-element-count').value);
@@ -164,25 +171,25 @@ async function renderUserData(loggedUser) {
 
 function logout() {
     logoutCurrentUser();
-    alert('Pomyślnie wylogowano');
-    document.location.href = '/index.html';
+    showToast('Pomyślnie wylogowano', 'success');
+    setTimeout(() => { document.location.href = '/index.html'; }, 1500);
 }
 
 async function sellAsset(transaction) {
     const loggedUser = getLoggedUser();
 
     if (!loggedUser) {
-        alert('Coś poszło nie tak...');
+        showToast('Coś poszło nie tak...', 'error');
         return;
     }
-    
+
     const todayAssetValue = Number(await getAssetTodayValue(transaction.asset, loggedUser.baseCurrency));
     loggedUser.balance = Number(loggedUser.balance) + Number(todayAssetValue.toFixed(2));
 
     const transactionIndex = loggedUser.transactions.findIndex(elem => elem.id === transaction.id);
 
     if (transactionIndex === -1) {
-        alert('Coś poszło nie tak...');
+        showToast('Coś poszło nie tak...', 'error');
         return;
     }
 
@@ -190,7 +197,7 @@ async function sellAsset(transaction) {
     originalTransaction.sellDate = new Date();
     originalTransaction.netValue = formatRateToNumber(todayAssetValue - Number(transaction.asset.purchasePrice));
 
-    alert('Udało się sprzedać aktywo!');
+    showToast('Udało się sprzedać aktywo!', 'success');
 
     syncLoggedUser(loggedUser);
     renderUserData(loggedUser);
@@ -284,8 +291,8 @@ async function renderPaginationContent(tabId) {
 
     if (currentPage > 1) paginationContainer.appendChild(addButton('«', currentPage - 1));
 
-    const startPage = Math.max(1, currentPage - windowSize);
-    const endPage = Math.min(totalPages, currentPage + windowSize);
+    const startPage = Math.max(1, currentPage - getWindowSize());
+    const endPage = Math.min(totalPages, currentPage + getWindowSize());
 
     if (startPage > 1) {
         paginationContainer.appendChild(addButton('1', 1, currentPage === 1));
