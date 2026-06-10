@@ -305,49 +305,49 @@ async function renderPaginationContent(tabId) {
         await renderPaginationContent(tabId);
     };
 
+    renderPagintaionButtons(paginationContainer, currentPage, totalPages, changePage);
+}
+
+function renderPagintaionButtons(container, currentPage, totalPages, changeFn) {
     const addButton = (text, pageNum, isActive = false, isDisabled = false) => {
         const button = document.createElement('button');
         button.textContent = text;
         button.disabled = isDisabled || isActive;
         
         if (isActive) button.classList.add('active');
-        if (!isDisabled && !isActive) button.addEventListener('click', () => changePage(pageNum));
+        if (!isDisabled && !isActive) button.addEventListener('click', () => changeFn(pageNum));
         
         return button;
     };
 
-    if (currentPage > 1) paginationContainer.appendChild(addButton('«', currentPage - 1));
+    if (currentPage > 1) container.appendChild(addButton('«', currentPage - 1));
 
     const startPage = Math.max(1, currentPage - getWindowSize());
     const endPage = Math.min(totalPages, currentPage + getWindowSize());
 
     if (startPage > 1) {
-        paginationContainer.appendChild(addButton('1', 1, currentPage === 1));
+        container.appendChild(addButton('1', 1, currentPage === 1));
         if (startPage > 2) {
             const span = document.createElement('span');
             span.textContent = '...';
-            paginationContainer.appendChild(span);
+            container.appendChild(span);
         }
     }
 
     for (let i = startPage; i <= endPage; i++) {
-        paginationContainer.appendChild(addButton(i, i, currentPage === i));
+        container.appendChild(addButton(i, i, currentPage === i));
     }
 
     if (endPage < totalPages) {
         if (endPage < totalPages - 1) {
             const span = document.createElement('span');
             span.textContent = '...';
-            paginationContainer.appendChild(span);
+            container.appendChild(span);
         }
-        paginationContainer.appendChild(addButton(totalPages, totalPages, currentPage === totalPages));
+        container.appendChild(addButton(totalPages, totalPages, currentPage === totalPages));
     }
 
-    if (currentPage < totalPages) paginationContainer.appendChild(addButton('»', currentPage + 1));
+    if (currentPage < totalPages) container.appendChild(addButton('»', currentPage + 1));
 
     if (currentPage > totalPages) changePage(currentPage - 1);
-}
-
-function renderPagintaionButtons() {
-
 }
