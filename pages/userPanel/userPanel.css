@@ -7,7 +7,6 @@
 body {
     background: #000;
     color: #fff;
-    font-family: 'Lato', sans-serif;
     margin: 0;
     padding: 0;
 }
@@ -245,7 +244,6 @@ main {
     font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
-    font-family: 'Lato', sans-serif;
     border-bottom: 3px solid transparent;
     transition: all 0.3s ease;
     position: relative;
@@ -382,7 +380,6 @@ main {
     height: 36px;
     padding: 0 10px;
     border-radius: 10px;
-    font-family: 'Lato', sans-serif;
     font-size: 0.9rem;
     font-weight: 700;
     cursor: pointer;
@@ -430,7 +427,6 @@ main {
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 10px;
     color: #c7d7e7;
-    font-family: 'Lato', sans-serif;
     font-size: 0.9rem;
     font-weight: 700;
     padding: 8px 32px 8px 12px;
