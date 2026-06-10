@@ -1,5 +1,6 @@
 import { registerUser, checkEmailValidity, checkPasswordStrength } from "/scripts/utils/auth.js"
 import { config } from "/scripts/config/config.js"
+import { showToast } from "/styles/popups/popup.js"
 const crypto = window.crypto
 
 async function register(event) {
@@ -11,32 +12,32 @@ async function register(event) {
     const confirmPassword = document.querySelector('#confirmPassword');
 
     if (!email.value || !password.value || !confirmPassword.value) {
-        alert('Proszę wypełnić wszystkie pola!');
+        showToast('Proszę wypełnić wszystkie pola!', 'error');
         return;
     }
 
     if (!checkEmailValidity(email.value)) {
-        alert('Nieprawidłowy format email!');
+        showToast('Nieprawidłowy format email!', 'error');
         return;
     }
 
     if(!checkPasswordStrength(password.value)) {
-        alert('Hasło musi mieć co najmniej 8 znaków, zawierać małą literę, dużą literę, cyfrę i znak specjalny!');
+        showToast('Hasło musi mieć co najmniej 8 znaków, zawierać małą literę, dużą literę, cyfrę i znak specjalny!', 'error');
         return;
     }
 
     if (password.value !== confirmPassword.value) {
-        alert('Hasła nie są identyczne!');
+        showToast('Hasła nie są identyczne!', 'error');
         return;
     }
-    
+
     if(!(await registerUser(email.value, password.value, currency.value))) {
-        alert('Cos poszlo nie tak...');
+        showToast('Coś poszło nie tak...', 'error');
         return;
     }
-    
-    alert('Rejestracja zakończona sukcesem! Możesz teraz się zalogować.');
-    document.location.href = '/pages/auth/login/login.html';
+
+    showToast('Rejestracja zakończona sukcesem! Możesz teraz się zalogować.', 'success');
+    setTimeout(() => { document.location.href = '/pages/auth/login/login.html'; }, 1500);
 }
 
 document.addEventListener('DOMContentLoaded', () => {

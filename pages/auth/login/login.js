@@ -1,5 +1,6 @@
 import { setLoggedUser } from "/scripts/globalState.js";
 import { hashSomething, getUser, checkEmailValidity, checkPasswordStrength } from "/scripts/utils/auth.js";
+import { showToast } from "/styles/popups/popup.js";
 
 const crypto = window.crypto;
 
@@ -10,12 +11,12 @@ async function loginSubmit(event) {
     const password = document.getElementById('password');
 
     if (!email.value || !password.value) {
-        alert('Proszę wypełnić wszystkie pola!');
+        showToast('Proszę wypełnić wszystkie pola!', 'error');
         return;
     }
 
     if (!checkEmailValidity(email.value)) {
-        alert('Nieprawidłowy format email!');
+        showToast('Nieprawidłowy format email!', 'error');
         return;
     }
 
@@ -28,15 +29,13 @@ async function loginUser(user) {
     const hashedPassword = await hashSomething(user.password, 'SHA-512');
 
     if (foundUser && foundUser.password === hashedPassword) {
-        alert('Logowanie zakończone sukcesem!');
-
+        showToast('Logowanie zakończone sukcesem!', 'success');
         setLoggedUser(foundUser);
-        document.location.href="/";
-
+        setTimeout(() => { document.location.href = "/"; }, 1500);
         return;
     }
 
-    alert('Nieprawidłowy email lub hasło!');
+    showToast('Nieprawidłowy email lub hasło!', 'error');
 }
      
 

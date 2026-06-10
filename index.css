@@ -5,7 +5,7 @@ body {
   background: #000;
   color: #fff;
   text-align: center;
-  font-family: 'Crete Round', serif;
+  font-family: 'Lato', sans-serif;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -15,10 +15,6 @@ body {
   box-sizing: inherit;
 }
 
-footer {
-  grid-column: 2;
-  width: 100%;
-}
 
 h1 {
   font-size: 1.8rem;
@@ -295,31 +291,7 @@ a {
   color: #ffffff;
 }
 
-footer {
-  background: #000;
-  color: #dfdfdf;
-}
-
-footer .footer-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 15px 20px;
-  text-align: center;
-}
-
-footer p {
-  margin: 4px 0;
-  font-size: 0.8rem;
-}
-
-footer a {
-  color: #ffffff;
-  text-decoration: none;
-  font-weight: 600;
-}
-
 /* Responsywność tablet+ */
-footer a:hover,
 nav a:hover {
   text-decoration: underline;
 }

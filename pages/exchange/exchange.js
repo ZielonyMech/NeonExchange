@@ -5,6 +5,7 @@ import { formatRateToString } from '/scripts/dataParser.js';
 import { getLoggedUser, syncLoggedUser } from '/scripts/globalState.js';
 import { renderChart } from '/pages/exchange/currencyChart.js'
 import { createAsset, createTransaction } from '/scripts/utils/types.js';
+import { showToast } from '/styles/popups/popup.js';
 
 let currentBaseCurrency = null;
 let currentSelectedCurrency = null;
@@ -48,9 +49,8 @@ async function getCurrencyRates(currency) {
         renderRates(exchangeValues, currency);
     }
     catch (err) {
-        //tu miejsce na takiego popupa i wyswietlenie ponowienia requesta
+        showToast("Nie udało się pobrać kursów walut. Spróbuj ponownie.", 'error');
         console.log(err);
-        console.log("wiwi");
     }
 }
 
@@ -142,18 +142,18 @@ function buyAsset(event) {
     const amount = Number(amountInput.value);
 
     if (isNaN(amount) || amount <= 0) {
-        alert("Podaj poprawną ilość do kupienia!");
+        showToast("Podaj poprawną ilość do kupienia!", 'error');
         return;
     }
 
     const loggedUser = getLoggedUser();
     if (!loggedUser) {
-        alert("Musisz być zalogowany, aby kupić tę walutę!");
+        showToast("Musisz być zalogowany, aby kupić tę walutę!", 'error');
         return;
     }
 
     if (amount > loggedUser.balance) {
-        alert("Brak wystarczających środków do zakupu waluty!");
+        showToast("Brak wystarczających środków do zakupu waluty!", 'error');
         return;
     }
 
@@ -170,7 +170,7 @@ function buyAsset(event) {
     loggedUser.balance -= boughtAsset.purchasePrice;
 
     syncLoggedUser(loggedUser);
-    alert(`Kupiłeś ${boughtAsset.boughtAmount.toFixed(2)} ${currentSelectedCurrency}!`);
+    showToast(`Kupiłeś ${boughtAsset.boughtAmount.toFixed(2)} ${currentSelectedCurrency}!`, 'success');
 }
 
 window.addEventListener('DOMContentLoaded', () => {

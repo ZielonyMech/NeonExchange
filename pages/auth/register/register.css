@@ -3,7 +3,7 @@
 body {
     background: #000;
     color: #fff;
-    font-family: 'Crete Round', serif;
+    font-family: 'Lato', sans-serif;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -71,6 +71,34 @@ main {
     transition: all 0.3s ease;
 }
 
+.form-group select {
+    width: 100%;
+    padding: 12px 36px 12px 14px;
+    border: 1px solid rgba(10, 201, 215, 0.3);
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: 'Lato', sans-serif;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.08) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%230ac9d7' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center;
+    color: #fff;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: #0ac9d7;
+    background-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 8px rgba(10, 201, 215, 0.2);
+}
+
+.form-group select option {
+    background: #151515;
+    color: #fff;
+}
+
 .form-group input::placeholder {
     color: rgba(255, 255, 255, 0.5);
 }
@@ -119,32 +147,6 @@ main {
     text-shadow: 0 0 8px rgba(10, 201, 215, 0.3);
 }
 
-footer {
-    background: #000;
-    color: #dfdfdf;
-}
-
-footer .footer-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 15px 20px;
-    text-align: center;
-}
-
-footer p {
-    margin: 4px 0;
-    font-size: 0.8rem;
-}
-
-footer a {
-    color: #ffffff;
-    text-decoration: none;
-    font-weight: 600;
-}
-
-footer a:hover {
-    text-decoration: underline;
-}
 
 /* Responsywność */
 @media (max-width: 480px) {

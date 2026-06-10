@@ -6,8 +6,10 @@
     <title>Kursy walut</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Crete+Round:ital@0;1&family=Jost:ital,wght@0,100..900;1,100..900&family=Pacifico&display=swap" rel="stylesheet">
-    <link href="./exchange.css" rel="stylesheet"> 
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Jost:ital,wght@0,100..900;1,100..900&family=Pacifico&display=swap" rel="stylesheet">
+    <link href="./exchange.css" rel="stylesheet">
+    <link href="/styles/footer.css" rel="stylesheet">
+    <link href="/styles/popups/popup.css" rel="stylesheet">
     <script src=" ./currencyChart.js" type="module"></script>
     <script src="./exchange.js" type="module"></script>
     <script src="/scripts/bootstrap.js" type="module"></script>
@@ -28,6 +30,7 @@
         <div class="exchangeRates"></div>
 
         <dialog id="chartDialog">
+            <div id="toast" class="toast"></div>
             <div class="loaderContainer" hidden>
                 <div class="loader"></div>
             </div>
@@ -81,6 +84,7 @@
             <p><a href="#contact">Kontakt</a> · <a href="#about">O nas</a> · <a href="#privacy">Polityka prywatności</a></p>
         </div>
     </footer>
+
 </body>
 </html>
 
