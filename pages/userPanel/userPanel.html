@@ -14,16 +14,16 @@
     <script src="./userPanel.js" type="module" defer></script>
 </head>
 <body>
-    <app-header></app-header>
+    <app-header role="banner"></app-header>
 
-    <main>
-        <section class="user-panel">
+    <main role="main">
+        <section class="user-panel" role="section" aria-label="Główny panel użytkownika">
             <div class="dashboard-grid">
                 <article class="summary-card user-card">
                     <div class="summary-card-header">
                         <h2>Informacje o koncie</h2>
                     </div>
-                    <div class="user-info-grid">
+                    <div class="user-info-grid" aria-live="polite" aria-atomic="true">
                         <div class="info-block">
                             <span class="info-label">Nazwa użytkownika</span>
                             <span id="username" class="info-value"></span>
@@ -51,7 +51,7 @@
                     <div class="chart-preview">
                         <canvas id="accountChart" class="account-chart" aria-label="Wykres stanu konta"></canvas>
                     </div>
-                    <div class="summary-values">
+                    <div class="summary-values" aria-live="polite" aria-atomic="true">
                         <div class="summary-row">
                             <span class="summary-label">Środki wraz z aktywami</span>
                             <span id="totalBalance" class="summary-number">0 PLN</span>
@@ -69,17 +69,17 @@
                 </article>
             </div>
 
-            <section class="positions-section">
+            <section class="positions-section" role="section" aria-labelledby="positions-heading">
                 <div class="section-title">
-                    <h2>Posiadane pozycje</h2>
+                    <h2 id="positions-heading">Posiadane pozycje</h2>
                 </div>
                 <div class="tabs-container">
-                    <div class="tabs-header">
-                        <button class="tab-button active" data-tab="current-positions">Aktualne pozycje</button>
-                        <button class="tab-button" data-tab="history">Historia</button>
+                    <div class="tabs-header" role="tablist" aria-label="Wybór widoku pozycji">
+                        <button class="tab-button active" role="tab" aria-selected="true" aria-controls="current-positions" id="tab-current">Aktualne pozycje</button>
+                        <button class="tab-button" role="tab" aria-selected="false" aria-controls="history" id="tab-history">Historia</button>
                     </div>
-                    <div class="tab-content active" id="current-positions">
-                        <div class="positions-list assetsList">
+                    <div class="tab-content active" id="current-positions" role="tabpanel" aria-labelledby="tab-current">
+                        <div class="positions-list assetsList" aria-live="polite" aria-atomic="true">
                             <div class="assetCard empty-state">
                                 <div class="asset-row empty-row">
                                     <div class="asset-cell empty-cell">
@@ -89,8 +89,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="tab-content" id="history">
-                        <div class="positions-list historyList">
+                    <div class="tab-content" id="history" role="tabpanel" aria-labelledby="tab-history" hidden>
+                        <div class="positions-list historyList" aria-live="polite" aria-atomic="true">
                             <div class="assetCard empty-state">
                                 <div class="asset-row empty-row">
                                     <div class="asset-cell empty-cell">
@@ -102,8 +102,8 @@
                     </div>
                 </div>
                 <div class="pagination-container">
-                    <ul class="pagination" id="pagination"></ul>
-                    <select id="pagination-element-count">
+                    <ul class="pagination" id="pagination" role="navigation" aria-label="Nawigacja stronami"></ul>
+                    <select id="pagination-element-count" aria-label="Liczba elementów na stronie">
                         <option value="5">5</option>
                         <option value="10" selected>10</option>
                         <option value="20">20</option>

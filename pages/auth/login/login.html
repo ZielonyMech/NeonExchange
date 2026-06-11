@@ -14,20 +14,23 @@
     <title>Logowanie</title>
 </head>
 <body>
-    <app-header></app-header>
+    <app-header role="banner"></app-header>
 
-    <main>
+    <main role="main">
         <section class="login-section">
             <div class="login-container">
-                <h2>🔐 Logowanie</h2>
+                <h2><span aria-hidden="true">🔐</span> Logowanie</h2>
+                
+                <div id="form-error-message" aria-live="assertive" aria-atomic="true"></div>
+
                 <form class="login-form" novalidate>
                     <div class="form-group">
                         <label for="email">Email:</label>
-                        <input type="email" id="email" name="email" required>
+                        <input type="email" id="email" name="email" required aria-required="true">
                     </div>
                     <div class="form-group">
                         <label for="password">Hasło:</label>
-                        <input type="password" id="password" name="password" required>
+                        <input type="password" id="password" name="password" required aria-required="true">
                     </div>
                     <button type="submit" class="btn">Zaloguj się</button>
                 </form>
@@ -36,7 +39,7 @@
         </section>
     </main>
 
-    <footer>
+    <footer role="contentinfo">
         <div class="footer-inner">
             <p>&copy; 2026 NeonExchange. Wszelkie prawa zastrzeżone.</p>
         </div>
