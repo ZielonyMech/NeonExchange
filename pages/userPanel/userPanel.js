@@ -6,6 +6,9 @@ import { createTransaction } from '/scripts/utils/types.js';
 import Chart from "https://cdn.jsdelivr.net/npm/chart.js@4.4.3/auto/+esm";
 
 const getWindowSize = () => window.innerWidth >= 960 ? 5 : window.innerWidth >= 600 ? 2 : 1;
+let pickedData = null;
+let pickedNetValue = null;
+let pickedCurrency = null;
 
 let availableTabs = {
     'current-positions': { currentPage: 1, totalPages: 1 },
@@ -48,7 +51,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         syncLoggedUser(loggedUser);
         showToast('Dodano 100 PLN do salda!', 'success');
         await renderUserData(loggedUser);
-    })
+    });
 
     document.querySelector('#startDate').addEventListener('change', async (e) => {
         const selectedDate = e.target.value;
@@ -59,6 +62,48 @@ window.addEventListener('DOMContentLoaded', async () => {
         const activeTab = document.querySelector('.tab-content.active');
         updateUserTransactions(getLoggedUser(), true);
         await renderPaginationContent(activeTab.id);
+    });
+
+    document.querySelector('#dateFilter').addEventListener('change', async (e) => {
+        const selectedDate = e.target.value;
+        pickedData = selectedDate ? new Date(selectedDate) : null;
+        await renderUserData(getLoggedUser());
+    });
+
+    let minNetValue = 0;
+    let maxNetValue = 0;
+    loggedUser.transactions.forEach(transaction => {
+        const netValue = transaction.netValue;
+        if (netValue < minNetValue) minNetValue = netValue;
+        if (netValue > maxNetValue) maxNetValue = netValue;
+    });
+
+    const currencySelect = document.querySelector('#selectCurrency');
+
+    loggedUser.transactions.forEach(transaction => {
+        if (transaction.asset.boughtCurrencyName !== loggedUser.baseCurrency && 
+            ![...currencySelect.options].some(option => option.value === transaction.asset.boughtCurrencyName)) {
+            const option = new Option(transaction.asset.boughtCurrencyName, transaction.asset.boughtCurrencyName, false, false);
+            currencySelect.add(option);
+        }
+    });
+
+    currencySelect.addEventListener('change', async (e) => {
+        pickedCurrency = e.target.value || null;
+        await renderUserData(getLoggedUser());
+    });
+
+    const netValueFilter = document.querySelector('#netValueFilter');
+    netValueFilter.setAttribute('min', minNetValue);
+    netValueFilter.setAttribute('max', maxNetValue);
+    netValueFilter.setAttribute('step', 0.01);
+    netValueFilter.value = 0;
+
+    netValueFilter.addEventListener('change', async (e) => {
+        const selectedValue = e.target.value;
+        pickedNetValue = selectedValue ? Number(selectedValue) : null;
+        document.querySelector('#netValueCurrent').textContent = pickedNetValue ? pickedNetValue.toFixed(2) + ' PLN' : '0.00 PLN';
+        await renderUserData(getLoggedUser());
     });
 
     await renderUserData(loggedUser);
@@ -98,7 +143,10 @@ async function renderOwnedAssets(loggedUser) {
     const assetsContainer = document.querySelector('.assetsList');
     assetsContainer.innerHTML = '';
 
-    const currentTransactions = loggedUser.transactions.filter(elem => !elem.sellDate);
+    const currentTransactions = loggedUser.transactions.filter(elem => !elem.sellDate && 
+        (!pickedData || new Date(elem.buyDate) >= pickedData) && 
+        (!pickedNetValue || elem.netValue >= pickedNetValue) && 
+        (!pickedCurrency || elem.asset.boughtCurrencyName === pickedCurrency));
     
     if (currentTransactions.length === 0) {
         assetsContainer.innerHTML = '<p>Brak aktywów do wyświetlenia.</p>';
@@ -118,7 +166,10 @@ async function renderTransactionHistory(loggedUser) {
     const historyContainer = document.querySelector('.historyList');
     historyContainer.innerHTML = '';
 
-    const historyTransactions = loggedUser.transactions.filter(elem => elem.sellDate);
+    const historyTransactions = loggedUser.transactions.filter(elem => elem.sellDate && 
+        (!pickedData || new Date(elem.sellDate) >= pickedData) && 
+        (!pickedNetValue || elem.netValue >= pickedNetValue) && 
+        (!pickedCurrency || elem.asset.boughtCurrencyName === pickedCurrency));
 
     if (historyTransactions.length === 0) {
         historyContainer.innerHTML = '<p>Brak transakcji do wyświetlenia.</p>';
