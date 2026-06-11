@@ -27,17 +27,44 @@ export async function getAssetTodayValue(asset, baseCurrency) {
 }
 
 export function calculateHistoryNetValue(loggedUser, minDate = null) {
-    if (!minDate) minDate = new Date(loggedUser.creationDate);
-
-    const filteredTransactions = loggedUser.transactions.filter(transaction => 
-        transaction.sellDate && new Date(transaction.sellDate) >= minDate
-    );
+    const filteredTransactions = getHistoryData(loggedUser, minDate);
 
     const totalHistoryDifference = filteredTransactions.reduce((acc, transaction) => {
         return acc + Number(transaction.netValue);
     }, 0);
 
     return totalHistoryDifference;
+}
+
+export function getHistoryDataByDate(loggedUser, minDate = null) {
+    const historyData = getHistoryData(loggedUser, minDate);
+
+    const historyByDate = historyData.reduce((acc, transaction) => {
+        const dateKey = new Date(transaction.sellDate).toLocaleDateString();
+        const existing = acc.find(item => item.date === dateKey);
+        
+        if (existing) {
+            existing.total += Number(transaction.netValue);
+        } else {
+            acc.push({ date: dateKey, total: Number(transaction.netValue) });
+        }
+        
+        return acc;
+    }, []);
+
+    return historyByDate.reduce((acc, item) => {
+        const prevDateTotal = acc.length > 0 ? acc[acc.length - 1].value : 0;
+        acc.push({ date: item.date, value: item.total + prevDateTotal });
+        return acc;
+    }, [])
+}
+
+export function getHistoryData(loggedUser, minDate = null) {
+    if (!minDate) minDate = new Date(loggedUser.creationDate);
+
+    return loggedUser.transactions.filter(transaction => 
+        transaction.sellDate && new Date(transaction.sellDate) >= minDate
+    );
 }
 
 export async function calculateTodayNetValue(loggedUser) {

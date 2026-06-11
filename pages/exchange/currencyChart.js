@@ -27,7 +27,11 @@ export async function renderChart(baseCurrency, selectedCurrency, range, { onRat
             fill: false,
             borderColor: 'rgb(75, 192, 192)',
             tension: 0.1
-        }]
+        }],
+        options: {
+            responsive: true,
+            maintainAspectRatio: true
+        }
     };
 
     selectedPoint = chartData.datasets[0].data.length - 1;
