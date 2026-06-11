@@ -117,12 +117,14 @@
     <header class="header">
         <div class="header-inner">
             <div class="brand"><slot name="brand">NeonExchange<span aria-hidden="true">🔄</span></slot></div>
-            <button class="hamburger" id="hamburger" aria-expanded="false">
+            
+            <button class="hamburger" id="hamburger" aria-expanded="false" aria-controls="navMenu" aria-label="Menu nawigacyjne">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
-            <nav class="nav-menu" id="navMenu" aria-label="Główna nawigacja">
+            
+            <nav class="nav-menu" id="navMenu" aria-label="Główna nawigacja" aria-hidden="true">
                 <slot name="nav">
                     <ul>
                         <li><a aria-label="przejdź do strony głównej" href="/index.html"> Strona główna</a></li>

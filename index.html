@@ -19,11 +19,11 @@
     <main id="home" role="main">
         <h1>Wymieniaj waluty błyskawicznie <span aria-hidden="true">⚡</span></h1>
         <p>Szybko, bezpiecznie i najkorzystniej — wszystkie kursy w jednym miejscu <span aria-hidden="true">🔥🌍</span></p>
-        <a href="pages/exchange/exchange.html" id="checkRatesBtn" class="cta-btn">Sprawdź kursy</a>
+        <a href="pages/exchange/exchange.html" id="checkRatesBtn" class="cta-btn" aria-label="Sprawdź aktualne kursy walut">Sprawdź kursy</a>
         
         <section class="rates" id="rates" aria-labelledby="rates-heading">
             <h2 id="rates-heading"><span aria-hidden="true">🔄</span> Aktualne kursy walut</h2>
-            <div class="course-list" role="list">
+            <div class="course-list" role="list" aria-live="polite" aria-atomic="true">
                 <div class="course-item" role="listitem" data-currency="usd"> <span>USD / PLN</span><strong>4.12</strong></div>
                 <div class="course-item" role="listitem" data-currency="eur"><span>EUR / PLN</span><strong>4.51</strong></div>
                 <div class="course-item" role="listitem" data-currency="gbp"><span>GBP / PLN</span><strong>5.28</strong></div>
