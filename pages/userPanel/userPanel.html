@@ -49,7 +49,7 @@
                         <h2>Stan twojego konta w czasie</h2>
                     </div>
                     <div class="chart-preview">
-                        <canvas id="accountChart" class="account-chart" aria-label="Wykres stanu konta"></canvas>
+                        <canvas id="history-chart" class="account-chart" aria-label="Wykres stanu konta"></canvas>
                     </div>
                     <div class="summary-values">
                         <div class="summary-row">
@@ -77,6 +77,21 @@
                     <div class="tabs-header">
                         <button class="tab-button active" data-tab="current-positions">Aktualne pozycje</button>
                         <button class="tab-button" data-tab="history">Historia</button>
+                    </div>
+                    <div class="tab-filters">
+                        <div class="filter-group">
+                            <label for="dateFilter">Filtruj po dacie</label>
+                            <input type="date" id="dateFilter">
+                        </div>
+                        <div class="filter-group">
+                            <label for="netValueFilter">Filtruj po wartości netto</label>
+                            <input type="range" id="netValueFilter">
+                            <span id="netValueCurrent">0.00 PLN</span>
+                        </div>
+                        <div class="filter-group">
+                            <label for="netValueFilter">Sortuj po wybranej walucie</label>
+                            <select id="selectCurrency"></select>
+                        </div>
                     </div>
                     <div class="tab-content active" id="current-positions">
                         <div class="positions-list assetsList">

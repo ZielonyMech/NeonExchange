@@ -1,11 +1,14 @@
 import { getLoggedUser, syncLoggedUser, logoutCurrentUser } from '/scripts/globalState.js';
 import { showToast } from '/styles/popups/popup.js';
 import { APIgetCurrencyRates } from '/scripts/apiFacade.js';
-import { getTodayCurrencyPrice, getAssetTodayValue, calculateHistoryNetValue, calculateTodayNetValue } from '/scripts/currency.js';
+import { getTodayCurrencyPrice, getAssetTodayValue, calculateHistoryNetValue, calculateTodayNetValue, getHistoryDataByDate } from '/scripts/currency.js';
 import { createTransaction } from '/scripts/utils/types.js';
-import { formatRateToNumber, formatRateToString } from '/scripts/dataParser.js';
+import Chart from "https://cdn.jsdelivr.net/npm/chart.js@4.4.3/auto/+esm";
 
 const getWindowSize = () => window.innerWidth >= 960 ? 5 : window.innerWidth >= 600 ? 2 : 1;
+let pickedData = null;
+let pickedNetValue = null;
+let pickedCurrency = null;
 
 let availableTabs = {
     'current-positions': { currentPage: 1, totalPages: 1 },
@@ -48,7 +51,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         syncLoggedUser(loggedUser);
         showToast('Dodano 100 PLN do salda!', 'success');
         await renderUserData(loggedUser);
-    })
+    });
 
     document.querySelector('#startDate').addEventListener('change', async (e) => {
         const selectedDate = e.target.value;
@@ -59,6 +62,48 @@ window.addEventListener('DOMContentLoaded', async () => {
         const activeTab = document.querySelector('.tab-content.active');
         updateUserTransactions(getLoggedUser(), true);
         await renderPaginationContent(activeTab.id);
+    });
+
+    document.querySelector('#dateFilter').addEventListener('change', async (e) => {
+        const selectedDate = e.target.value;
+        pickedData = selectedDate ? new Date(selectedDate) : null;
+        await renderUserData(getLoggedUser());
+    });
+
+    let minNetValue = 0;
+    let maxNetValue = 0;
+    loggedUser.transactions.forEach(transaction => {
+        const netValue = transaction.netValue;
+        if (netValue < minNetValue) minNetValue = netValue;
+        if (netValue > maxNetValue) maxNetValue = netValue;
+    });
+
+    const currencySelect = document.querySelector('#selectCurrency');
+
+    loggedUser.transactions.forEach(transaction => {
+        if (transaction.asset.boughtCurrencyName !== loggedUser.baseCurrency && 
+            ![...currencySelect.options].some(option => option.value === transaction.asset.boughtCurrencyName)) {
+            const option = new Option(transaction.asset.boughtCurrencyName, transaction.asset.boughtCurrencyName, false, false);
+            currencySelect.add(option);
+        }
+    });
+
+    currencySelect.addEventListener('change', async (e) => {
+        pickedCurrency = e.target.value || null;
+        await renderUserData(getLoggedUser());
+    });
+
+    const netValueFilter = document.querySelector('#netValueFilter');
+    netValueFilter.setAttribute('min', minNetValue);
+    netValueFilter.setAttribute('max', maxNetValue);
+    netValueFilter.setAttribute('step', 0.01);
+    netValueFilter.value = 0;
+
+    netValueFilter.addEventListener('change', async (e) => {
+        const selectedValue = e.target.value;
+        pickedNetValue = selectedValue ? Number(selectedValue) : null;
+        document.querySelector('#netValueCurrent').textContent = pickedNetValue ? pickedNetValue.toFixed(2) + ' PLN' : '0.00 PLN';
+        await renderUserData(getLoggedUser());
     });
 
     await renderUserData(loggedUser);
@@ -98,7 +143,10 @@ async function renderOwnedAssets(loggedUser) {
     const assetsContainer = document.querySelector('.assetsList');
     assetsContainer.innerHTML = '';
 
-    const currentTransactions = loggedUser.transactions.filter(elem => !elem.sellDate);
+    const currentTransactions = loggedUser.transactions.filter(elem => !elem.sellDate && 
+        (!pickedData || new Date(elem.buyDate) >= pickedData) && 
+        (!pickedNetValue || elem.netValue >= pickedNetValue) && 
+        (!pickedCurrency || elem.asset.boughtCurrencyName === pickedCurrency));
     
     if (currentTransactions.length === 0) {
         assetsContainer.innerHTML = '<p>Brak aktywów do wyświetlenia.</p>';
@@ -118,7 +166,10 @@ async function renderTransactionHistory(loggedUser) {
     const historyContainer = document.querySelector('.historyList');
     historyContainer.innerHTML = '';
 
-    const historyTransactions = loggedUser.transactions.filter(elem => elem.sellDate);
+    const historyTransactions = loggedUser.transactions.filter(elem => elem.sellDate && 
+        (!pickedData || new Date(elem.sellDate) >= pickedData) && 
+        (!pickedNetValue || elem.netValue >= pickedNetValue) && 
+        (!pickedCurrency || elem.asset.boughtCurrencyName === pickedCurrency));
 
     if (historyTransactions.length === 0) {
         historyContainer.innerHTML = '<p>Brak transakcji do wyświetlenia.</p>';
@@ -162,11 +213,38 @@ async function renderUserData(loggedUser) {
     const todayNetValue = await calculateTodayNetValue(loggedUser);
 
     const totalDifference = historyNetValue + todayNetValue;
+    renderHistoryChart(getHistoryDataByDate(loggedUser, new Date(datePicker.value)));
 
     totalBalanceElement.textContent = `${(Number(loggedUser.balance) + todayNetValue).toFixed(2)} PLN`;
     dayStatusElement.textContent = `${totalDifference >= 0 ? '+' : ''}${totalDifference.toFixed(2)} PLN`;
     dayStatusElement.classList.toggle('positive', totalDifference >= 0);
     dayStatusElement.classList.toggle('negative', totalDifference < 0);
+}
+
+let chart = null
+
+function renderHistoryChart(historyNetValue) {
+    const chartContainer = document.querySelector('#history-chart');
+    
+    if(chart) chart.destroy();
+
+    chart = new Chart(chartContainer, {
+        type: 'line',
+        data: {
+            labels: historyNetValue.map(elem => elem.date),
+            datasets: [{
+                label: 'Wartość netto z historii transakcji',
+                data: historyNetValue.map(elem => elem.value),
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true
+        }
+    });
 }
 
 function logout() {
@@ -195,7 +273,7 @@ async function sellAsset(transaction) {
 
     const originalTransaction = loggedUser.transactions[transactionIndex];
     originalTransaction.sellDate = new Date();
-    originalTransaction.netValue = formatRateToNumber(todayAssetValue - Number(transaction.asset.purchasePrice));
+    originalTransaction.netValue = (todayAssetValue - Number(transaction.asset.purchasePrice)).toFixed(2);
 
     showToast('Udało się sprzedać aktywo!', 'success');
 
@@ -224,12 +302,12 @@ async function createAssetCard(transaction, isSold = false) {
         const saleValueElement = assetElement.querySelector('slot[name="saleValue"]');
         const saleDateElement = assetElement.querySelector('slot[name="saleDate"]');
         
-        quantityElement.textContent = `${formatRateToString(asset.boughtAmount)} ${asset.boughtCurrencyName}`;
-        buyPriceElement.textContent = `${formatRateToString(asset.purchasePrice)} ${asset.baseCurrency}`;
-        saleValueElement.textContent = `${formatRateToString(Number(transaction.netValue) + asset.purchasePrice)} ${asset.baseCurrency}`;
+        quantityElement.textContent = `${asset.boughtAmount.toFixed(2)} ${asset.boughtCurrencyName}`;
+        buyPriceElement.textContent = `${asset.purchasePrice.toFixed(2)} ${asset.baseCurrency}`;
+        saleValueElement.textContent = `${(Number(transaction.netValue) + asset.purchasePrice).toFixed(2)} ${asset.baseCurrency}`;
         saleDateElement.textContent = transaction.sellDate ? new Date(transaction.sellDate).toLocaleDateString() : 'N/A';
         
-        const profitLoss = formatRateToNumber(transaction.netValue - asset.purchasePrice);
+        const profitLoss = (transaction.netValue - asset.purchasePrice).toFixed(2);
         assetCardElement.classList.toggle('positive', profitLoss >= 0);
         assetCardElement.classList.toggle('negative', profitLoss < 0);
     } else {
@@ -237,14 +315,14 @@ async function createAssetCard(transaction, isSold = false) {
         const assetCompareDifference = assetElement.querySelector('slot[name="assetCompareDifference"]');
         const sellButton = assetElement.querySelector('.sell-btn');
         
-        const assetTodayValue = await getAssetTodayValue(asset, loggedUser.baseCurrency);
+        const assetTodayValue = Number(await getAssetTodayValue(asset, loggedUser.baseCurrency));
         
-        quantityElement.textContent = `${formatRateToString(asset.boughtAmount)} ${asset.boughtCurrencyName}`;
-        buyPriceElement.textContent = `${formatRateToString(asset.purchasePrice)} ${asset.baseCurrency}`;
-        currentValueElement.textContent = `${formatRateToString(assetTodayValue)} ${asset.baseCurrency}`;
+        quantityElement.textContent = `${asset.boughtAmount.toFixed(2)} ${asset.boughtCurrencyName}`;
+        buyPriceElement.textContent = `${asset.purchasePrice.toFixed(2)} ${asset.baseCurrency}`;
+        currentValueElement.textContent = `${assetTodayValue.toFixed(2)} ${asset.baseCurrency}`;
         
         const netValue = assetTodayValue - asset.purchasePrice;
-        assetCompareDifference.textContent = `${netValue >= 0 ? '+' : ''}${formatRateToString(netValue)} ${asset.baseCurrency}`;
+        assetCompareDifference.textContent = `${netValue >= 0 ? '+' : ''}${netValue.toFixed(2)} ${asset.baseCurrency}`;
         assetCardElement.classList.toggle('positive', netValue >= 0);
         assetCardElement.classList.toggle('negative', netValue < 0);
         
@@ -278,49 +356,49 @@ async function renderPaginationContent(tabId) {
         await renderPaginationContent(tabId);
     };
 
+    renderPagintaionButtons(paginationContainer, currentPage, totalPages, changePage);
+}
+
+function renderPagintaionButtons(container, currentPage, totalPages, changeFn) {
     const addButton = (text, pageNum, isActive = false, isDisabled = false) => {
         const button = document.createElement('button');
         button.textContent = text;
         button.disabled = isDisabled || isActive;
         
         if (isActive) button.classList.add('active');
-        if (!isDisabled && !isActive) button.addEventListener('click', () => changePage(pageNum));
+        if (!isDisabled && !isActive) button.addEventListener('click', () => changeFn(pageNum));
         
         return button;
     };
 
-    if (currentPage > 1) paginationContainer.appendChild(addButton('«', currentPage - 1));
+    if (currentPage > 1) container.appendChild(addButton('«', currentPage - 1));
 
     const startPage = Math.max(1, currentPage - getWindowSize());
     const endPage = Math.min(totalPages, currentPage + getWindowSize());
 
     if (startPage > 1) {
-        paginationContainer.appendChild(addButton('1', 1, currentPage === 1));
+        container.appendChild(addButton('1', 1, currentPage === 1));
         if (startPage > 2) {
             const span = document.createElement('span');
             span.textContent = '...';
-            paginationContainer.appendChild(span);
+            container.appendChild(span);
         }
     }
 
     for (let i = startPage; i <= endPage; i++) {
-        paginationContainer.appendChild(addButton(i, i, currentPage === i));
+        container.appendChild(addButton(i, i, currentPage === i));
     }
 
     if (endPage < totalPages) {
         if (endPage < totalPages - 1) {
             const span = document.createElement('span');
             span.textContent = '...';
-            paginationContainer.appendChild(span);
+            container.appendChild(span);
         }
-        paginationContainer.appendChild(addButton(totalPages, totalPages, currentPage === totalPages));
+        container.appendChild(addButton(totalPages, totalPages, currentPage === totalPages));
     }
 
-    if (currentPage < totalPages) paginationContainer.appendChild(addButton('»', currentPage + 1));
+    if (currentPage < totalPages) container.appendChild(addButton('»', currentPage + 1));
 
     if (currentPage > totalPages) changePage(currentPage - 1);
-}
-
-function renderPagintaionButtons() {
-
 }
